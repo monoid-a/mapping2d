@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\variograms">
+      <UniqueIdentifier>{039285c9-448d-49c1-b462-23247f687815}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\interpolators">
+      <UniqueIdentifier>{605e9c9c-88bb-4e7b-84e5-1a060058be20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interpolators">
+      <UniqueIdentifier>{ff252b8a-802e-4027-91f1-5998df8cbd91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rbfs">
+      <UniqueIdentifier>{0e19819c-f464-44e2-858a-e9ed312ecc81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rbfs">
+      <UniqueIdentifier>{adc36ae8-5cf8-4058-abd6-953c9f0fab95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\variograms">
+      <UniqueIdentifier>{afd0812c-3352-4f1f-a330-b3fa7241ed80}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="mapping2d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RegularMesh2d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Surface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mapping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InverseDistanceWeighting.cpp">
+      <Filter>Source Files\interpolators</Filter>
+    </ClCompile>
+    <ClCompile Include="OrdinaryKriging.cpp">
+      <Filter>Source Files\interpolators</Filter>
+    </ClCompile>
+    <ClCompile Include="RbfInterpolator.cpp">
+      <Filter>Source Files\interpolators</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleKriging.cpp">
+      <Filter>Source Files\interpolators</Filter>
+    </ClCompile>
+    <ClCompile Include="UniversalKriging.cpp">
+      <Filter>Source Files\interpolators</Filter>
+    </ClCompile>
+    <ClCompile Include="MatrixCalculator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CubicVar.cpp">
+      <Filter>Source Files\variograms</Filter>
+    </ClCompile>
+    <ClCompile Include="ExponentVar.cpp">
+      <Filter>Source Files\variograms</Filter>
+    </ClCompile>
+    <ClCompile Include="GaussVar.cpp">
+      <Filter>Source Files\variograms</Filter>
+    </ClCompile>
+    <ClCompile Include="SphericalVar.cpp">
+      <Filter>Source Files\variograms</Filter>
+    </ClCompile>
+    <ClCompile Include="GaussianRbf.cpp">
+      <Filter>Source Files\rbfs</Filter>
+    </ClCompile>
+    <ClCompile Include="InverseMultiquadraticRbf.cpp">
+      <Filter>Source Files\rbfs</Filter>
+    </ClCompile>
+    <ClCompile Include="InverseQuadraticRbf.cpp">
+      <Filter>Source Files\rbfs</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiquadraticRbf.cpp">
+      <Filter>Source Files\rbfs</Filter>
+    </ClCompile>
+    <ClCompile Include="VectorCalculator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LinearEstimator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Structs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RegularMesh2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Variogramer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Surface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SphericalVar.h">
+      <Filter>Header Files\variograms</Filter>
+    </ClInclude>
+    <ClInclude Include="ExponentVar.h">
+      <Filter>Header Files\variograms</Filter>
+    </ClInclude>
+    <ClInclude Include="GaussVar.h">
+      <Filter>Header Files\variograms</Filter>
+    </ClInclude>
+    <ClInclude Include="CubicVar.h">
+      <Filter>Header Files\variograms</Filter>
+    </ClInclude>
+    <ClInclude Include="Variograms.h">
+      <Filter>Header Files\variograms</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InterpolAccessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Interpolators.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InverseDistanceWeighting.h">
+      <Filter>Header Files\interpolators</Filter>
+    </ClInclude>
+    <ClInclude Include="OrdinaryKriging.h">
+      <Filter>Header Files\interpolators</Filter>
+    </ClInclude>
+    <ClInclude Include="RbfInterpolator.h">
+      <Filter>Header Files\interpolators</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleKriging.h">
+      <Filter>Header Files\interpolators</Filter>
+    </ClInclude>
+    <ClInclude Include="GaussianRbf.h">
+      <Filter>Header Files\rbfs</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiquadraticRbf.h">
+      <Filter>Header Files\rbfs</Filter>
+    </ClInclude>
+    <ClInclude Include="InverseQuadraticRbf.h">
+      <Filter>Header Files\rbfs</Filter>
+    </ClInclude>
+    <ClInclude Include="InverseMultiquadraticRbf.h">
+      <Filter>Header Files\rbfs</Filter>
+    </ClInclude>
+    <ClInclude Include="UniversalKriging.h">
+      <Filter>Header Files\interpolators</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixCalculator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VectorCalculator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
