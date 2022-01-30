@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "mapper2d_qt.h"
 #include "MapWidget.h"
 #include "mapping2d/MethodSettings.h"

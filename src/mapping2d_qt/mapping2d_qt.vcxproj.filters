@@ -28,10 +28,10 @@
     <ClCompile Include="mapper2d_qt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClInclude Include="stdafx.h">
+    <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

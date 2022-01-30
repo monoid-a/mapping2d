@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "Surface.h"
 
 Surface::Surface(size_t nx, size_t ny)

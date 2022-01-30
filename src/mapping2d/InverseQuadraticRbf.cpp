@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "InverseQuadraticRbf.h"
 #include "Structs.h"
 

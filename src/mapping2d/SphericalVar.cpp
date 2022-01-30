@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "SphericalVar.h"
 #include "Structs.h"
 

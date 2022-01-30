@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "RegularMesh2d.h"
 #include "Structs.h"
 

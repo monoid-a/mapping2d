@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "RbfInterpolator.h"
 #include "MatrixCalculator.h"
 

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "MapWidget.h"
 #include "mapping2d/RegularMesh2d.h"
 #include "mapping2d/Surface.h"

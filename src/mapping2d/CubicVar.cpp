@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "CubicVar.h"
 #include "Structs.h"
 

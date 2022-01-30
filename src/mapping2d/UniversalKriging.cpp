@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "UniversalKriging.h"
 #include "Structs.h"
 #include "MatrixCalculator.h"
