@@ -2,7 +2,7 @@
 
 struct Point;
 
-struct CubicVar
+struct MAPPING2D CubicVar
 {
 	CubicVar();
 	CubicVar(double _c, double _c0, double _a);

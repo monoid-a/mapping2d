@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "MapWidget.h"
-#include "mapping2d/RegularMesh2d.h"
-#include "mapping2d/Surface.h"
-#include "mapping2d/Variograms.h"
-#include "mapping2d/Mapping.h"
+#include "../mapping2d/RegularMesh2d.h"
+#include "../mapping2d/Surface.h"
+#include "../mapping2d/Variograms.h"
+#include "../mapping2d/Mapping.h"
 
 #include <chrono>
 
@@ -32,7 +32,7 @@ void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, size_t
 		return;
 
 #ifdef _DEBUG
-	auto start = std::chrono::high_resolution_clock::now();
+//	auto start = std::chrono::high_resolution_clock::now();
 #endif
 
 	m_points = ps;
@@ -63,8 +63,8 @@ void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, size_t
 	m_surface = Mapping::calculateSurface(m_points, settings, nx, ny);
 
 #ifdef _DEBUG
-	auto stop = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+//	auto stop = std::chrono::high_resolution_clock::now();
+//	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
 //	QMessageBox msgBox;
 //	QString val(std::to_string(duration.count()).c_str());

@@ -2,7 +2,7 @@
 
 struct Point;
 
-struct GaussVar
+struct MAPPING2D GaussVar
 {
 	GaussVar();
 	GaussVar(double _c, double _c0, double _a);

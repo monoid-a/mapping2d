@@ -2,11 +2,17 @@
 
 #include <QtWidgets/QWidget>
 #include <QDir>
-#include "mapping2d/Structs.h"
-#include "mapping2d/MethodSettings.h"
+#include "../mapping2d/MethodSettings.h"
+#include "../mapping2d/Structs.h"
 
 class RegularMesh2d;
 class MapWidget;
+class QGridLayout;
+class QListWidget;
+class QComboBox;
+class QLineEdit;
+class QLabel;
+class QCheckBox;
 
 class mapper2d_qt : public QWidget
 {

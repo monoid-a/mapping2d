@@ -2,7 +2,7 @@
 
 struct Point;
 
-struct ExponentVar
+struct MAPPING2D ExponentVar
 {
 	ExponentVar();
 	ExponentVar(double _c, double _c0, double _a);

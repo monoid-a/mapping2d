@@ -2,7 +2,7 @@
 
 struct Point;
 
-class InverseQuadraticRbf
+class MAPPING2D InverseQuadraticRbf
 {
 public:
 	InverseQuadraticRbf();

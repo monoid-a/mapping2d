@@ -2,7 +2,7 @@
 
 #include "Structs.h"
 
-class MatrixCalculator
+class MAPPING2D MatrixCalculator
 {
 public:
 	static UblDblMatrix calcMatrix(const std::vector<double>& xs, const std::vector<double>& ys, size_t nx, size_t ny, const two_points_func& gamma, const matrix_modif& matrix_func, double init_val = 0.0);

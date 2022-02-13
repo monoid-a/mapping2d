@@ -1,6 +1,9 @@
 #pragma once
 
 #include <functional>
+#include <vector>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/vector.hpp>
 
 struct Point;
 using two_points_func = std::function<double(const Point& u, const Point& v)>;

@@ -16,4 +16,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 
-#define MAPPING2D __declspec(dllexport)
+#ifdef _WIN32
+	#define MAPPING2D __declspec(dllexport)
+#else
+	#define MAPPING2D
+#endif

@@ -19,4 +19,8 @@
 
 #include <QtWidgets>
 
-#define MAPPING2D __declspec(dllimport)
+#ifdef _WIN32
+	#define MAPPING2D __declspec(dllimport)
+#else
+	#define MAPPING2D
+#endif

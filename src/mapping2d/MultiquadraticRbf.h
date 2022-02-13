@@ -2,7 +2,7 @@
 
 struct Point;
 
-class MultiquadraticRbf
+class MAPPING2D MultiquadraticRbf
 {
 public:
 	MultiquadraticRbf();

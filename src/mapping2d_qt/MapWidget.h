@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QWidget>
-#include "mapping2d/RegularMesh2d.h"
-#include "mapping2d/MethodSettings.h"
+#include "../mapping2d/RegularMesh2d.h"
+#include "../mapping2d/MethodSettings.h"
 
 class RegularMesh2d;
 struct  PointsData;

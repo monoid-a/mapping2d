@@ -2,7 +2,7 @@
 
 struct Point;
 
-struct SphericalVar
+struct MAPPING2D SphericalVar
 {
 	SphericalVar();
 	SphericalVar(double _c, double _c0, double _a);

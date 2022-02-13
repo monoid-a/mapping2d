@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "mapper2d_qt.h"
 #include "MapWidget.h"
-#include "mapping2d/MethodSettings.h"
-#include "mapping2d/Variograms.h"
+#include "../mapping2d/MethodSettings.h"
+#include "../mapping2d/Variograms.h"
 
 mapper2d_qt::mapper2d_qt(QWidget* parent) : QWidget(parent)
 {

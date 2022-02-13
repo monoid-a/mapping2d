@@ -2,7 +2,7 @@
 
 struct Point;
 
-class GaussianRbf
+class MAPPING2D GaussianRbf
 {
 public:
 	GaussianRbf();
