@@ -15,10 +15,9 @@ public:
 	~RbfInterpolator();
 
 protected:
-	std::vector<double> _getWeights(double x, double y);
-	std::vector<double> _getVals();
-	double _correctZ(double z);
+	std::vector<double> getWeights(double x, double y);
+	std::vector<double> getVals();
+	double correctZ(double z);
 
-protected:
-	UblDblMatrix _calcMatrix();
+	UblDblMatrix calcMatrix();
 };

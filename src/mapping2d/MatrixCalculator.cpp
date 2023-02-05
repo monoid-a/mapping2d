@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "MatrixCalculator.h"
 
-UblDblMatrix MatrixCalculator::calcMatrix(const std::vector<double>& xs, const std::vector<double>& ys, size_t nx, size_t ny, const two_points_func& gamma, const matrix_modif& matrix_func, double init_val)
+UblDblMatrix MatrixCalculator::calcMatrix(const std::vector<double>& xs, const std::vector<double>& ys, size_t nx, size_t ny, const two_points_func& gamma, const modif_matrix& matrix_func, double init_val)
 {
 	UblDblMatrix matr(nx, ny, init_val);
 

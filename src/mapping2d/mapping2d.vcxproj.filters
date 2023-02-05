@@ -31,6 +31,12 @@
     <Filter Include="Source Files\variograms">
       <UniqueIdentifier>{afd0812c-3352-4f1f-a330-b3fa7241ed80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\isoliner">
+      <UniqueIdentifier>{27f97973-e5e3-4e5a-9dfe-221ab118fb54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\isoliner">
+      <UniqueIdentifier>{7b067333-9f06-4267-8158-6fa039e9a212}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mapping2d.cpp">
@@ -43,9 +49,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Surface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mapping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InverseDistanceWeighting.cpp">
@@ -93,6 +96,18 @@
     <ClCompile Include="VectorCalculator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Isovalues.cpp">
+      <Filter>Source Files\isoliner</Filter>
+    </ClCompile>
+    <ClCompile Include="Isoline.cpp">
+      <Filter>Source Files\isoliner</Filter>
+    </ClCompile>
+    <ClCompile Include="Mapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MarchingSquares.cpp">
+      <Filter>Source Files\isoliner</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LinearEstimator.h">
@@ -111,9 +126,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Surface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mapping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SphericalVar.h">
@@ -172,6 +184,24 @@
     </ClInclude>
     <ClInclude Include="VectorCalculator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Isoline.h">
+      <Filter>Header Files\isoliner</Filter>
+    </ClInclude>
+    <ClInclude Include="IsolineAccessor.h">
+      <Filter>Header Files\isoliner</Filter>
+    </ClInclude>
+    <ClInclude Include="Isoliner.h">
+      <Filter>Header Files\isoliner</Filter>
+    </ClInclude>
+    <ClInclude Include="Isovalues.h">
+      <Filter>Header Files\isoliner</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MarchingSquares.h">
+      <Filter>Header Files\isoliner</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

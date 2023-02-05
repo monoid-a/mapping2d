@@ -22,18 +22,20 @@ public:
 	mapper2d_qt(QWidget* parent = Q_NULLPTR);
 
 protected:
-	void _fillCtrlLayout(QGridLayout* ctrlLayout);
+	void fillCtrlLayout(QGridLayout* ctrlLayout);
 
-	void _onFilesBtnClicked();
-	void _updateFileCombo();
+	void onFilesBtnClicked();
+	void updateFileCombo();
 
-	void _setFile();
+	void setFile();
 
-	void _createMap();
-	void _selectMethod();
-	void _selectFunction();
-	void _processCtrlsOnMethodSelect();
-	void _drawGridChecked();
+	void createMap();
+	void selectMethod();
+	void selectFunction();
+	void processCtrlsOnMethodSelect();
+	void drawGridChecked();
+	void discreteFillChecked();
+	void continuousFillChecked();
 
 private:
 	MapWidget* m_mapWidget;
@@ -55,6 +57,8 @@ private:
 	QLabel* m_nyLbl;
 	QLineEdit* m_nyEdit;
 	QCheckBox* m_drawGrid;
+	QCheckBox* m_discreteFill;
+	QCheckBox* m_continuousFill;
 	std::vector<std::pair<Method, QString>> m_methods;
 	std::vector<std::pair<Function, QString>> m_variograms;
 	std::vector<std::pair<Function, QString>> m_rbfs;

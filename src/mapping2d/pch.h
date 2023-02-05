@@ -9,12 +9,18 @@
 
 #include <vector>
 #include <cmath>
+#include <unordered_set>
+#include <unordered_map>
+#include <deque>
+#include <numeric>
 
 #define BOOST_UBLAS_NDEBUG
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>
+#include <boost/optional.hpp>
+#include <boost/functional/hash.hpp>
 
 #ifdef _WIN32
 	#define MAPPING2D __declspec(dllexport)

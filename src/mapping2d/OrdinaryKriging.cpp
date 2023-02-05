@@ -16,14 +16,15 @@ OrdinaryKriging::~OrdinaryKriging()
 {
 }
 
-UblDblMatrix OrdinaryKriging::_calcMatrix()
+UblDblMatrix OrdinaryKriging::calcMatrix()
 {
 	const size_t nx = mPointsData.x.size() + 1;
 	const size_t ny = mPointsData.y.size() + 1;
 
 	const size_t size = mPointsData.x.size();
 
-	UblDblMatrix matr = MatrixCalculator::calcMatrix(mPointsData.x, mPointsData.y, nx, ny, mGamma, [size](UblDblMatrix& matr)
+	UblDblMatrix matr = MatrixCalculator::calcMatrix(mPointsData.x, mPointsData.y, nx, ny, mGamma, 
+		[size](UblDblMatrix& matr)
 		{
 			for (size_t k = 0, p_cnt = size; k < p_cnt; ++k)
 			{
@@ -35,29 +36,29 @@ UblDblMatrix OrdinaryKriging::_calcMatrix()
 	return matr;
 }
 
-UblDblVec OrdinaryKriging::_calcVec(double x, double y, const PointsData& data, const two_points_func& gamma)
+UblDblVec OrdinaryKriging::calcVec(double x, double y, const PointsData& data, const two_points_func& gamma)
 {
-	return VectorCalculator::calcVector(x, y, data, data.x.size() + 1, gamma,
+	return VectorCalculator::calculate(x, y, data, data.x.size() + 1, gamma,
 		[](UblDblVec& vec)
 		{
 			vec[vec.size() - 1] = 1.0;
 		});
 }
 
-UblDblVec OrdinaryKriging::_calcWeights(const UblDblMatrix& A_inv, const UblDblVec& b)
+UblDblVec OrdinaryKriging::calcWeights(const UblDblMatrix& A_inv, const UblDblVec& b)
 {
 	auto w = prod(A_inv, b);
 	return w;
 }
 
-std::vector<double> OrdinaryKriging::_getWeights(double x, double y)
+std::vector<double> OrdinaryKriging::getWeights(double x, double y)
 {
-	UblDblVec b = _calcVec(x, y, mPointsData, mGamma);
-	UblDblVec w = _calcWeights(mInvA, b);
+	UblDblVec b = calcVec(x, y, mPointsData, mGamma);
+	UblDblVec w = calcWeights(mInvA, b);
 	return { w.begin() , w.end() };
 }
 
-std::vector<double> OrdinaryKriging::_getVals()
+std::vector<double> OrdinaryKriging::getVals()
 {
 	std::vector<double> res;
 	for (auto v : mPointsData.z)
@@ -65,7 +66,7 @@ std::vector<double> OrdinaryKriging::_getVals()
 	return res;
 }
 
-double OrdinaryKriging::_correctZ(double z)
+double OrdinaryKriging::correctZ(double z)
 {
 	return z;
 }

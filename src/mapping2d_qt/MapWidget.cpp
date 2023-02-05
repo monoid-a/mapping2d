@@ -1,25 +1,24 @@
 #include "pch.h"
 #include "MapWidget.h"
-#include "../mapping2d/RegularMesh2d.h"
-#include "../mapping2d/Surface.h"
+#include "../mapping2d/MarchingSquares.h"
 #include "../mapping2d/Variograms.h"
-#include "../mapping2d/Mapping.h"
-
-#include <chrono>
+#include "../mapping2d/Mapper.h"
 
 MapWidget::MapWidget(QWidget* parent) : QWidget(parent)
 {
-	m_scale = 1.0;
-	m_deltaScale = 1.0;
-	m_points = nullptr;
-	m_surface = nullptr;
-	m_center = { 0.0, 0.0 };
-	m_xMax = 0.0;
-	m_xMin = 0.0;
-	m_yMax = 0.0;
-	m_yMin = 0.0;
-	m_drawGrid = false;
-	m_prevPos = std::make_pair(-1, -1);
+	mScale = 1.0;
+	mDeltaScale = 1.0;
+	mPoints = nullptr;
+	mSurface = nullptr;
+	mCenter = { 0.0, 0.0 };
+	mXMax = 0.0;
+	mXMin = 0.0;
+	mYMax = 0.0;
+	mYMin = 0.0;
+	mDrawGrid = true;
+	mDiscreteFill = true;
+	mContinuousFill = false;
+	mPrevPos = std::make_pair(-1, -1);
 }
 
 MapWidget::~MapWidget()
@@ -31,56 +30,48 @@ void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, size_t
 	if (ps->x.empty() || ps->y.empty() || ps->z.empty())
 		return;
 
-#ifdef _DEBUG
-//	auto start = std::chrono::high_resolution_clock::now();
-#endif
+	mPoints = ps;
 
-	m_points = ps;
+	mMesh = RegularMesh2d::calculate(*ps, nx, ny);
 
-	m_mesh = RegularMesh2d::calcRegularMesh2d(*ps, nx, ny);
+	mXMax = mMesh.getXMax();
+	mYMax = mMesh.getYMax();
 
-	m_xMax = m_mesh.getXMax();
-	m_yMax = m_mesh.getYMax();
-
-	double xMin = m_mesh.getXMin();
-	double yMin = m_mesh.getYMin();
+	double xMin = mMesh.getXMin();
+	double yMin = mMesh.getYMin();
 
 	int w = width();
 	int h = height();
 
-	int screen_min = std::minmax(w, h).first;
+	int screen_min = (std::min)(w, h);
 
-	m_scale = std::minmax(m_xMax - xMin, m_yMax - yMin).first;
+	mScale = (std::min)(mXMax - xMin, mYMax - yMin);
 
-	m_scale = 0.75 * screen_min / m_scale;
+	mScale = 0.75 * screen_min / mScale;
 
-	m_deltaScale = 0.1 * m_scale;
+	mDeltaScale = 0.1 * mScale;
 
-	m_translate = { 0.5 * width() , 0.5 * height() };
+	mTranslate = { 0.5 * width() , 0.5 * height() };
 
-	m_center = { xMin + 0.5 * (m_xMax - xMin) , yMin + 0.5 * (m_yMax - yMin) };
+	mCenter = { xMin + 0.5 * (mXMax - xMin) , yMin + 0.5 * (mYMax - yMin) };
 
-	m_surface = Mapping::calculateSurface(m_points, settings, nx, ny);
+	mSurface = Mapper::calculateSurface(mPoints, settings, nx, ny);
 
-#ifdef _DEBUG
-//	auto stop = std::chrono::high_resolution_clock::now();
-//	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+	int levelCount = 10;
+	double step = (mSurface->getZMax() - mSurface->getZMin()) / levelCount;
 
-//	QMessageBox msgBox;
-//	QString val(std::to_string(duration.count()).c_str());
-//	msgBox.setText(val + " milliseconds.");
-//	msgBox.exec();
-#endif
+	MarchingSquares marchSqrIsoliner(mSurface.get());
+	mIsolines = marchSqrIsoliner.calculate(mSurface->getZMin(), mSurface->getZMax(), levelCount, step);
 
-	m_zMin = m_surface->getZMin();
-	m_zMax = m_surface->getZMax();
+	mZMin = mSurface->getZMin();
+	mZMax = mSurface->getZMax();
 
-	m_prevPos = std::make_pair(-1, -1);
+	mPrevPos = std::make_pair(-1, -1);
 }
 
 void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-	if (m_mesh.getNx() == 0 || m_mesh.getNy() == 0)
+	if (mMesh.getNx() == 0 || mMesh.getNy() == 0)
 		return;
 
 	if (event->button() == Qt::LeftButton)
@@ -88,9 +79,9 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 		QPoint point = event->pos();
 		double x = inv_transform_x(point.x());
 		double y = inv_transform_y(point.y());
-		Node node = m_mesh.getIJ(x, y);
+		Node node = mMesh.getIJ(x, y);
 
-		double z = m_surface->getZ(node.i, node.j);
+		double z = mSurface->getZ(node.i, node.j);
 		QString val(std::to_string(z).c_str());
 		val = "Surface value: " + val;
 		val = "Point: " + QString(std::to_string(x).c_str()) + ", " + QString(std::to_string(y).c_str()) + 
@@ -102,7 +93,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 	}
 
 	if (event->button() == Qt::RightButton)
-		m_prevPos = std::make_pair(-1, -1);
+		mPrevPos = std::make_pair(-1, -1);
 }
 
 void MapWidget::mouseMoveEvent(QMouseEvent* event)
@@ -110,27 +101,27 @@ void MapWidget::mouseMoveEvent(QMouseEvent* event)
 	if (event->buttons() & Qt::RightButton)
 	{
 		QPoint point = event->pos();
-		if (m_prevPos.first == -1 && m_prevPos.second == -1)
+		if (mPrevPos.first == -1 && mPrevPos.second == -1)
 		{
-			m_prevPos.first = point.x();
-			m_prevPos.second = point.y();
+			mPrevPos.first = point.x();
+			mPrevPos.second = point.y();
 			return;
 		}
 
 		double x = inv_transform_x(point.x());
 		double y = inv_transform_y(point.y());
 
-		double prev_x = inv_transform_x(m_prevPos.first);
-		double prev_y = inv_transform_y(m_prevPos.second);
+		double prev_x = inv_transform_x(mPrevPos.first);
+		double prev_y = inv_transform_y(mPrevPos.second);
 
 		double dx = prev_x - x;
 		double dy = prev_y - y;
 
-		m_center.first += dx;
-		m_center.second += dy;
+		mCenter.first += dx;
+		mCenter.second += dy;
 
-		m_prevPos.first = point.x();
-		m_prevPos.second = point.y();
+		mPrevPos.first = point.x();
+		mPrevPos.second = point.y();
 
 		update();
 	}
@@ -138,33 +129,45 @@ void MapWidget::mouseMoveEvent(QMouseEvent* event)
 
 void MapWidget::setDrawGrid(bool b)
 {
-	m_drawGrid = b;
+	mDrawGrid = b;
+	update();
+}
+
+void MapWidget::setDiscreteFill(bool b)
+{
+	mDiscreteFill = b;
+	update();
+}
+
+void MapWidget::setContinuousFill(bool b)
+{
+	mContinuousFill = b;
 	update();
 }
 
 double MapWidget::inv_transform_x(double x)
 {
-	return m_center.first + (x - m_translate.first) / m_scale;
+	return mCenter.first + (x - mTranslate.first) / mScale;
 }
 
 double MapWidget::inv_transform_y(double y)
 {
-	return m_center.second - (y - m_translate.second) / m_scale;
+	return mCenter.second - (y - mTranslate.second) / mScale;
 }
 
 double MapWidget::transform_x(double x)
 {
-	return (x - m_center.first) * m_scale + m_translate.first;
+	return (x - mCenter.first) * mScale + mTranslate.first;
 }
 
 double MapWidget::transform_y(double y)
 {
-	return (-y + m_center.second) * m_scale + m_translate.second;
+	return (-y + mCenter.second) * mScale + mTranslate.second;
 }
 
-void MapWidget::_drawGrid(QPainter& painter)
+void MapWidget::drawGrid(QPainter& painter)
 {
-	if (!m_drawGrid)
+	if (!mDrawGrid)
 		return;
 
 	QPen pen;
@@ -176,13 +179,13 @@ void MapWidget::_drawGrid(QPainter& painter)
 
 	painter.setPen(pen);
 
-	size_t nx = m_mesh.getNx();
-	size_t ny = m_mesh.getNy();
+	size_t nx = mMesh.getNx();
+	size_t ny = mMesh.getNy();
 
 	for (size_t i = 0; i < nx; i++)
 	{
-		Point p0 = m_mesh.getXY(i, 0);
-		Point p1 = m_mesh.getXY(i, ny - 1);
+		Point p0 = mMesh.getXY(i, 0);
+		Point p1 = mMesh.getXY(i, ny - 1);
 
 		int x0 = transform_x(p0.x);
 		int y0 = transform_y(p0.y);
@@ -195,8 +198,8 @@ void MapWidget::_drawGrid(QPainter& painter)
 	
 	for (size_t j = 0; j < ny; j++)
 	{
-		Point p0 = m_mesh.getXY(0, j);
-		Point p1 = m_mesh.getXY(nx - 1, j);
+		Point p0 = mMesh.getXY(0, j);
+		Point p1 = mMesh.getXY(nx - 1, j);
 
 		int x0 = transform_x(p0.x);
 		int y0 = transform_y(p0.y);
@@ -208,9 +211,12 @@ void MapWidget::_drawGrid(QPainter& painter)
 	}
 }
 
-void MapWidget::_drawSurface(QPainter& painter)
+void MapWidget::drawSurface(QPainter& painter)
 {
-	if (!m_surface)
+	if (!mSurface)
+		return;
+
+	if (!mDiscreteFill)
 		return;
 
 	QPen pen;
@@ -222,19 +228,19 @@ void MapWidget::_drawSurface(QPainter& painter)
 
 	painter.setPen(pen);
 
-	size_t nx = m_mesh.getNx();
-	size_t ny = m_mesh.getNy();
+	size_t nx = mMesh.getNx();
+	size_t ny = mMesh.getNy();
 
 	Qt::BrushStyle brushStyle = Qt::SolidPattern;
 
-	double dx = m_mesh.getDx();
-	double dy = m_mesh.getDy();
+	double dx = mMesh.getDx();
+	double dy = mMesh.getDy();
 
 	for (size_t i = 0; i < nx; i++)
 	{
 		for (size_t j = 0; j < ny; j++)
 		{
-			Point p0 = m_mesh.getXY(i, j);
+			Point p0 = mMesh.getXY(i, j);
 			Point p1;
 			p1.x = p0.x + dx;
 			p1.y = p0.y + dy;
@@ -250,8 +256,8 @@ void MapWidget::_drawSurface(QPainter& painter)
 
 			QRectF rect(x0 - 0.5 * (qreal)dx, y0 - 0.5 * (qreal)dy, (qreal)dx, (qreal)dy);
 
-			double z = m_surface->getZ(i, j);
-			double hue = (240.0 / 360.0) * (z - m_zMin) / (m_zMax - m_zMin);
+			double z = mSurface->getZ(i, j);
+			double hue = (240.0 / 360.0) * (mZMax - z) / (mZMax - mZMin);
 			double s = 1.0;
 			QColor colour = QColor::fromHsvF(qreal(hue), qreal(s), qreal(1.0));
 
@@ -261,21 +267,21 @@ void MapWidget::_drawSurface(QPainter& painter)
 	}
 }
 
-void MapWidget::_drawPoints(QPainter& painter)
+void MapWidget::drawPoints(QPainter& painter)
 {
-	if (!m_points)
+	if (!mPoints)
 		return;
 
 	Qt::BrushStyle style = Qt::SolidPattern;
 	QBrush brush(Qt::black, style);
 	painter.setBrush(brush);
 
-	size_t _size = m_points->x.size();
+	size_t _size = mPoints->x.size();
 
 	for (size_t i = 0; i < _size; ++i)
 	{
-		double x = m_points->x[i];
-		double y = m_points->y[i];
+		double x = mPoints->x[i];
+		double y = mPoints->y[i];
 
 		double pX = transform_x(x);
 		double pY = transform_y(y);
@@ -292,17 +298,54 @@ void MapWidget::_drawPoints(QPainter& painter)
 		painter.setPen(pen);
 		painter.drawText(QPoint(pX + 10, pY - 1), name);
 
-		QString val(std::to_string(m_points->z[i]).c_str());
+		QString val(std::to_string(mPoints->z[i]).c_str());
 		painter.drawText(QPoint(pX + 10, pY + 15), val);
 	}
 }
 
-void MapWidget::_drawScale(QPainter& painter)
+void MapWidget::drawScale(QPainter& painter)
 {
 
 }
 
-void MapWidget::_drawScene()
+void MapWidget::drawIsolines(QPainter& painter)
+{
+	QPen pen;
+	pen.setStyle(Qt::SolidLine);
+	pen.setWidth(1);
+	pen.setBrush(Qt::black);
+	pen.setCapStyle(Qt::RoundCap);
+	pen.setJoinStyle(Qt::RoundJoin);
+	painter.setPen(pen);
+
+	for (const auto& iso_p : mIsolines)
+	{
+		const Isoline& iso = iso_p.second;
+		size_t size = iso.getSize();
+
+		for (size_t i = 0; i < size - 1; i++)
+		{
+			Point p0 = iso.get(i);
+			Point p1 = iso.get(i + 1);
+
+			int x0 = transform_x(p0.x);
+			int y0 = transform_y(p0.y);
+
+			int x1 = transform_x(p1.x);
+			int y1 = transform_y(p1.y);
+
+			painter.drawLine(x0, y0, x1, y1);
+		}
+	}
+}
+
+void MapWidget::drawIsobands(QPainter& painter)
+{
+	if (!mContinuousFill)
+		return;
+}
+
+void MapWidget::drawScene()
 {
 	QPainter painter(this);
 
@@ -319,15 +362,17 @@ void MapWidget::_drawScene()
 	QRect rect(0, 0, w, h);
 	painter.fillRect(rect, backgroundBrush);
 
-	_drawSurface(painter);
-	_drawPoints(painter);
-	_drawGrid(painter);
-	_drawScale(painter);
+	drawSurface(painter);
+	drawIsobands(painter);
+	drawPoints(painter);
+	drawGrid(painter);
+	drawScale(painter);
+	drawIsolines(painter);
 }
 
 void MapWidget::paintEvent(QPaintEvent* ev)
 {
-	_drawScene();
+	drawScene();
 	__super::paintEvent(ev);
 }
 
@@ -337,11 +382,11 @@ void MapWidget::wheelEvent(QWheelEvent* ev)
 
 	double y = numDegrees.y();
 	y /= abs(y);
-	y *= m_deltaScale;
-	if (m_scale - y <= 0)
+	y *= mDeltaScale;
+	if (mScale - y <= 0)
 		return __super::wheelEvent(ev);
 
-	m_scale -= y;
+	mScale -= y;
 
 	ev->accept();
 

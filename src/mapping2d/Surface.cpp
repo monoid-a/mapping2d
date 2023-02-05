@@ -1,13 +1,15 @@
 #include "pch.h"
 #include "Surface.h"
+#include <numeric>
 
-Surface::Surface(size_t nx, size_t ny)
+Surface::Surface(const RegularMesh2d& mesh) : mMesh(mesh)
 {
-	m_values.resize(nx);
+	size_t nx = mMesh.getNx();
+	mValues.resize(nx);
 	for (size_t i = 0; i < nx; i++)
-		m_values[i].resize(ny);
-	m_zMin = FLT_MAX;
-	m_zMax = -FLT_MAX;
+		mValues[i].resize(mMesh.getNy());
+	mZMin = std::numeric_limits<double>::max();
+	mZMax = std::numeric_limits<double>::lowest();
 }
 
 Surface::~Surface()
@@ -17,22 +19,37 @@ Surface::~Surface()
 
 void Surface::setZ(size_t i, size_t j, double z)
 {
-	m_values[i][j] = z;
-	m_zMin = std::minmax(m_zMin, z).first;
-	m_zMax = std::minmax(m_zMax, z).second;
+	mValues[i][j] = z;
+	mZMin = (std::min)(mZMin, z);
+	mZMax = (std::max)(mZMax, z);
 }
 
 double Surface::getZ(size_t i, size_t j)
 {
-	return m_values[i][j];
+	return mValues[i][j];
 }
 
 double Surface::getZMin()
 {
-	return m_zMin;
+	return mZMin;
 }
 
 double Surface::getZMax()
 {
-	return m_zMax;
+	return mZMax;
+}
+
+size_t Surface::getNx() const
+{
+	return mMesh.getNx();
+}
+
+size_t Surface::getNy() const
+{
+	return mMesh.getNy();
+}
+
+const RegularMesh2d& Surface::getMesh() const
+{
+	return mMesh;
 }

@@ -36,3 +36,5 @@ find_package(Boost)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 target_link_libraries(mapping2d_prj_src PUBLIC mapping2d Qt5::Widgets Boost::boost)
+
+set_property(TARGET mapping2d_prj_src PROPERTY CXX_STANDARD 14)

@@ -39,25 +39,25 @@ mapper2d_qt::mapper2d_qt(QWidget* parent) : QWidget(parent)
 	QHBoxLayout* centralLayout = new QHBoxLayout;
 	centralLayout->addWidget(m_mapWidget);
 	auto ctrlLayout = new QGridLayout;
-	_fillCtrlLayout(ctrlLayout);
+	fillCtrlLayout(ctrlLayout);
 	centralLayout->addLayout(ctrlLayout);
 	setLayout(centralLayout);
 	centralLayout->setStretch(0, 1);
 	centralLayout->setStretch(1, 0);
 }
 
-void mapper2d_qt::_fillCtrlLayout(QGridLayout* ctrlLayout)
+void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 {
 	ctrlLayout->setAlignment(Qt::AlignTop);
 
 	const int columnSpan = 4;
 	QPushButton* filesBtn = new QPushButton(this);
 	filesBtn->setText("Choose data directory");
-	connect(filesBtn, &QPushButton::clicked, this, &mapper2d_qt::_onFilesBtnClicked);
+	connect(filesBtn, &QPushButton::clicked, this, &mapper2d_qt::onFilesBtnClicked);
 	ctrlLayout->addWidget(filesBtn, 0, 0, 1, columnSpan);
 
 	m_fileList = new QListWidget(this);
-	connect(m_fileList, &QListWidget::itemDoubleClicked, this, &mapper2d_qt::_setFile);
+	connect(m_fileList, &QListWidget::itemDoubleClicked, this, &mapper2d_qt::setFile);
 	m_fileList->setFixedHeight(100);
 	ctrlLayout->addWidget(m_fileList, 1, 0, 1, columnSpan);
 
@@ -66,11 +66,11 @@ void mapper2d_qt::_fillCtrlLayout(QGridLayout* ctrlLayout)
 		m_methodsCmb->addItem(p.second, QVariant((int)p.first));
 	m_methodsCmb->setCurrentIndex(1);
 	ctrlLayout->addWidget(m_methodsCmb, 2, 0, 1, columnSpan);
-	connect(m_methodsCmb, &QComboBox::currentTextChanged, this, &mapper2d_qt::_selectMethod);
+	connect(m_methodsCmb, &QComboBox::currentTextChanged, this, &mapper2d_qt::selectMethod);
 
 	m_variogramCmb = new QComboBox(this);
 	ctrlLayout->addWidget(m_variogramCmb, 3, 0, 1, columnSpan);
-	connect(m_variogramCmb, &QComboBox::currentTextChanged, this, &mapper2d_qt::_createMap);
+	connect(m_variogramCmb, &QComboBox::currentTextChanged, this, &mapper2d_qt::createMap);
 	
 	m_param0Label = new QLabel(this);
 	m_param0Label->setText("a:");
@@ -105,7 +105,7 @@ void mapper2d_qt::_fillCtrlLayout(QGridLayout* ctrlLayout)
 	{
 		auto dv = new QDoubleValidator(edit);
 		edit->setValidator(dv);
-		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::_createMap);
+		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::createMap);
 	}
 
 	m_nxLbl = new QLabel(this);
@@ -127,30 +127,43 @@ void mapper2d_qt::_fillCtrlLayout(QGridLayout* ctrlLayout)
 	{
 		auto dv = new QIntValidator(edit);
 		edit->setValidator(dv);
-		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::_createMap);
+		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::createMap);
 	}
 
 	m_drawGrid = new QCheckBox(this);
 	m_drawGrid->setText("Draw grid");
 	m_drawGrid->setChecked(true);
-	connect(m_drawGrid, &QCheckBox::clicked, this, &mapper2d_qt::_drawGridChecked);
+	connect(m_drawGrid, &QCheckBox::clicked, this, &mapper2d_qt::drawGridChecked);
 	ctrlLayout->addWidget(m_drawGrid, 7, 0, 1, columnSpan);
 
-	_processCtrlsOnMethodSelect();
+	m_discreteFill = new QCheckBox(this);
+	m_discreteFill->setText("Discrete fill");
+	m_discreteFill->setChecked(true);
+	connect(m_discreteFill, &QCheckBox::clicked, this, &mapper2d_qt::discreteFillChecked);
+	ctrlLayout->addWidget(m_discreteFill, 8, 0, 1, columnSpan);
+
+	m_continuousFill = new QCheckBox(this);
+	m_continuousFill->setText("Continuous fill");
+	m_continuousFill->setChecked(false);
+	connect(m_continuousFill, &QCheckBox::clicked, this, &mapper2d_qt::continuousFillChecked);
+	ctrlLayout->addWidget(m_continuousFill, 9, 0, 1, columnSpan);
+	m_continuousFill->setDisabled(true);
+
+	processCtrlsOnMethodSelect();
 }
 
-void mapper2d_qt::_selectFunction()
+void mapper2d_qt::selectFunction()
 {
-	_createMap();
+	createMap();
 }
 
-void mapper2d_qt::_selectMethod()
+void mapper2d_qt::selectMethod()
 {
-	_processCtrlsOnMethodSelect();
-	_createMap();
+	processCtrlsOnMethodSelect();
+	createMap();
 }
 
-void mapper2d_qt::_processCtrlsOnMethodSelect()
+void mapper2d_qt::processCtrlsOnMethodSelect()
 {
 	QVariant var = m_methodsCmb->itemData(m_methodsCmb->currentIndex());
 	auto method = static_cast<Method>(var.toInt());
@@ -193,12 +206,23 @@ void mapper2d_qt::_processCtrlsOnMethodSelect()
 		assert(0);
 }
 
-void mapper2d_qt::_drawGridChecked()
+void mapper2d_qt::drawGridChecked()
 {
 	m_mapWidget->setDrawGrid(m_drawGrid->isChecked());
 }
 
-void mapper2d_qt::_onFilesBtnClicked()
+void mapper2d_qt::discreteFillChecked()
+{
+	m_mapWidget->setDiscreteFill(m_discreteFill->isChecked());
+}
+
+void mapper2d_qt::continuousFillChecked()
+{
+	m_mapWidget->setContinuousFill(m_continuousFill->isChecked());
+
+}
+
+void mapper2d_qt::onFilesBtnClicked()
 {
 	QString path = QFileDialog::getExistingDirectory(0, tr("Choose Directory"), m_filesDir.absolutePath());
 
@@ -207,10 +231,10 @@ void mapper2d_qt::_onFilesBtnClicked()
 
 	m_filesDir.setPath(path);
 
-	_updateFileCombo();
+	updateFileCombo();
 }
 
-void mapper2d_qt::_setFile()
+void mapper2d_qt::setFile()
 {
 	auto file_name = m_fileList->currentItem()->text();
 	QString file_path = m_filesDir.filePath(file_name);
@@ -239,10 +263,10 @@ void mapper2d_qt::_setFile()
 			break;
 	}
 
-	_createMap();
+	createMap();
 }
 
-void mapper2d_qt::_updateFileCombo()
+void mapper2d_qt::updateFileCombo()
 {
 	QFileInfoList list = m_filesDir.entryInfoList();
 
@@ -269,7 +293,7 @@ public:
 	}
 };
 
-void mapper2d_qt::_createMap()
+void mapper2d_qt::createMap()
 {
 	MWaitCursor wait;
 

@@ -5,7 +5,7 @@
 class MAPPING2D Surface
 {
 public:
-	Surface(size_t ni, size_t nj);
+	Surface(const RegularMesh2d& mesh);
 	~Surface();
 
 	void setZ(size_t i, size_t j, double z);
@@ -14,8 +14,14 @@ public:
 	double getZMin();
 	double getZMax();
 
+	size_t getNx() const;
+	size_t getNy() const;
+
+	const RegularMesh2d& getMesh() const;
+
 protected:
-	std::vector<std::vector<double>> m_values;
-	double m_zMin;
-	double m_zMax;
+	RegularMesh2d mMesh;
+	std::vector<std::vector<double>> mValues;
+	double mZMin;
+	double mZMax;
 };

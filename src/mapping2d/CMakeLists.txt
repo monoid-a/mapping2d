@@ -20,3 +20,5 @@ include_directories(${Boost_INCLUDE_DIR})
 add_library(mapping2d SHARED ${mapping2d_SRC})
 
 target_precompile_headers(mapping2d PRIVATE ${CMAKE_SOURCE_DIR}/src/mapping2d/pch.h)
+
+set_property(TARGET mapping2d PROPERTY CXX_STANDARD 14)

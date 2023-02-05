@@ -17,7 +17,7 @@ InverseDistanceWeighting::~InverseDistanceWeighting()
 
 }
 
-std::vector<double> InverseDistanceWeighting::_getWeights(double x, double y)
+std::vector<double> InverseDistanceWeighting::getWeights(double x, double y)
 {
 	std::vector<double> inverse_distances;
 	int inf_ind = -1;
@@ -56,7 +56,7 @@ std::vector<double> InverseDistanceWeighting::_getWeights(double x, double y)
 	return vec;
 }
 
-std::vector<double> InverseDistanceWeighting::_getVals()
+std::vector<double> InverseDistanceWeighting::getVals()
 {
 	std::vector<double> res;
 	for (auto v : mPointsData.z)
@@ -64,7 +64,7 @@ std::vector<double> InverseDistanceWeighting::_getVals()
 	return res;
 }
 
-double InverseDistanceWeighting::_correctZ(double z)
+double InverseDistanceWeighting::correctZ(double z)
 {
 	return z;
 }

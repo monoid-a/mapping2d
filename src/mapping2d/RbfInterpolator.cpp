@@ -17,7 +17,7 @@ RbfInterpolator::~RbfInterpolator()
 
 }
 
-UblDblMatrix RbfInterpolator::_calcMatrix()
+UblDblMatrix RbfInterpolator::calcMatrix()
 {
 	const auto& xs = mPointsData.x;
 	const auto& ys = mPointsData.y;
@@ -26,7 +26,7 @@ UblDblMatrix RbfInterpolator::_calcMatrix()
 	return MatrixCalculator::calcMatrix(xs, ys, nx, ny, mGamma, nullptr);
 }
 
-std::vector<double> RbfInterpolator::_getWeights(double x, double y)
+std::vector<double> RbfInterpolator::getWeights(double x, double y)
 {
 	UblDblVec vec(mPointsData.x.size(), 0.0);
 
@@ -36,7 +36,7 @@ std::vector<double> RbfInterpolator::_getWeights(double x, double y)
 	return { vec.begin() , vec.end() };
 }
 
-std::vector<double> RbfInterpolator::_getVals()
+std::vector<double> RbfInterpolator::getVals()
 {
 	UblDblVec f(mPointsData.z.size(), 0.0);
 	for (size_t i = 0, p_cnt = mPointsData.z.size(); i < p_cnt; ++i)
@@ -51,7 +51,7 @@ std::vector<double> RbfInterpolator::_getVals()
 	return vv;
 }
 
-double RbfInterpolator::_correctZ(double z)
+double RbfInterpolator::correctZ(double z)
 {
 	return z;
 }

@@ -1,8 +1,11 @@
 #pragma once
 
 #include <QWidget>
+
 #include "../mapping2d/RegularMesh2d.h"
 #include "../mapping2d/MethodSettings.h"
+#include "../mapping2d/Isoline.h"
+#include "../mapping2d/Surface.h"
 
 class RegularMesh2d;
 struct  PointsData;
@@ -18,16 +21,20 @@ public:
 
 	void calculateSurface(PointsData* ps, MethodSettings settings, size_t nx, size_t ny);
 	void setDrawGrid(bool b);
+	void setDiscreteFill(bool b);
+	void setContinuousFill(bool b);
 
 protected:
 	void mouseReleaseEvent(QMouseEvent* event) override;
 	void mouseMoveEvent(QMouseEvent* event) override;
 
-	void _drawPoints(QPainter& painter);
-	void _drawGrid(QPainter& painter);
-	void _drawSurface(QPainter& painter);
-	void _drawScale(QPainter& painter);
-	void _drawScene();
+	void drawPoints(QPainter& painter);
+	void drawGrid(QPainter& painter);
+	void drawSurface(QPainter& painter);
+	void drawScale(QPainter& painter);
+	void drawIsolines(QPainter& painter);
+	void drawIsobands(QPainter& painter);
+	void drawScene();
 
 	void paintEvent(QPaintEvent* ev);
 	void wheelEvent(QWheelEvent* ev);
@@ -39,19 +46,22 @@ protected:
 	double inv_transform_y(double y);
 
 private:
-	double m_scale;
-	double m_deltaScale;
-	std::pair<double, double> m_translate;
-	std::pair<double, double> m_center;
-	RegularMesh2d m_mesh;
-	PointsData* m_points;
-	std::unique_ptr<Surface> m_surface;
-	double m_xMax;
-	double m_xMin;
-	double m_yMax;
-	double m_yMin;
-	double m_zMin;
-	double m_zMax;
-	bool m_drawGrid;
-	std::pair<int, int> m_prevPos;
+	double mScale;
+	double mDeltaScale;
+	std::pair<double, double> mTranslate;
+	std::pair<double, double> mCenter;
+	RegularMesh2d mMesh;
+	PointsData* mPoints;
+	std::unique_ptr<Surface> mSurface;
+	std::vector<std::pair<double, Isoline>> mIsolines;
+	double mXMax;
+	double mXMin;
+	double mYMax;
+	double mYMin;
+	double mZMin;
+	double mZMax;
+	bool mDrawGrid;
+	bool mDiscreteFill;
+	bool mContinuousFill;
+	std::pair<int, int> mPrevPos;
 };
