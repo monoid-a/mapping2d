@@ -15,9 +15,9 @@ public:
 	~InverseDistanceWeighting();
 
 protected:
-	std::vector<double> getWeights(double x, double y);
-	std::vector<double> getVals();
-	double correctZ(double z);
+	std::vector<double> getWeights(double x, double y) const;
+	std::vector<double> getVals() const;
+	double correctZ(double z) const;
 
 private:
 	double m_order;

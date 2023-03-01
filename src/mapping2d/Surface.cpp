@@ -24,17 +24,17 @@ void Surface::setZ(size_t i, size_t j, double z)
 	mZMax = (std::max)(mZMax, z);
 }
 
-double Surface::getZ(size_t i, size_t j)
+double Surface::getZ(size_t i, size_t j) const
 {
 	return mValues[i][j];
 }
 
-double Surface::getZMin()
+double Surface::getZMin() const
 {
 	return mZMin;
 }
 
-double Surface::getZMax()
+double Surface::getZMax() const
 {
 	return mZMax;
 }

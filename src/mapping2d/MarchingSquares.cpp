@@ -48,24 +48,27 @@ struct IsolineBuilder
 	{
 	}
 
-	void addIsoStruct(IsoStruct isoSt)
+	bool onFrame(const IsoStruct& isoSt)
 	{
-		iso_structs.insert({ std::make_pair(isoSt.node.i, isoSt.node.j), isoSt });
-		
-		if ((isoSt.node.i == 0 || isoSt.node.j == 0) &&
+		return ((isoSt.node.i == 0 || isoSt.node.j == 0) &&
 			std::find_if(isoSt.adj_nodes.begin(), isoSt.adj_nodes.end(),
 				[](const Node& node)
 				{
 					return node.i == size_t(-1) || node.j == size_t(-1);
-				}) != isoSt.adj_nodes.end())
-			cells_on_frame.push_back(isoSt);
+				}) != isoSt.adj_nodes.end()) ||
+			((isoSt.node.i == mesh.getNx() - 2 || isoSt.node.j == mesh.getNy() - 2) &&
+				std::find_if(isoSt.adj_nodes.begin(), isoSt.adj_nodes.end(),
+					[this](const Node& node)
+					{
+						return node.i == mesh.getNx() - 1 || node.j == mesh.getNy() - 1;
+					}) != isoSt.adj_nodes.end());
+	}
 
-		if ((isoSt.node.i == mesh.getNx() - 2 || isoSt.node.j == mesh.getNy() - 2) && 
-			std::find_if(isoSt.adj_nodes.begin(), isoSt.adj_nodes.end(),
-				[this](const Node& node)
-				{
-					return node.i == mesh.getNx() - 1 || node.j == mesh.getNy() - 1;
-				}) != isoSt.adj_nodes.end())
+	void addIsoStruct(IsoStruct isoSt)
+	{
+		iso_structs.insert({ std::make_pair(isoSt.node.i, isoSt.node.j), isoSt });
+		
+		if (onFrame(isoSt))
 			cells_on_frame.push_back(isoSt);
 	}
 
@@ -133,7 +136,7 @@ struct IsolineBuilder
 
 			for (auto it = range.first; it != range.second; ++it)
 			{
-				if (it->second.visited)
+				if (it->second.visited || !onFrame(it->second))
 					continue;
 				Isoline iso = traceIsoline(it->second);
 				if (iso.getSize())
@@ -169,7 +172,7 @@ MarchingSquares::~MarchingSquares()
 
 }
 
-CellTraceVariant cellTraceVariant(Surface* surface, size_t i, size_t j, double isovalue)
+CellTraceVariant cellTraceVariant(const Surface* surface, size_t i, size_t j, double isovalue)
 {
 	double bottom_left = surface->getZ(i, j);
 	double bottom_right = surface->getZ(i + 1, j);
@@ -221,7 +224,7 @@ std::vector<Node> nextNodes(size_t i, size_t j, CellTraceVariant variant, bool t
 	return {};
 }
 
-std::vector<std::pair<Segment, std::vector<Node>>> calcSegments(Surface* surface, size_t i, size_t j, double isovalue)
+std::vector<std::pair<Segment, std::vector<Node>>> calcSegments(const Surface* surface, size_t i, size_t j, double isovalue)
 {
 	CellTraceVariant variant = cellTraceVariant(surface, i, j, isovalue);
 

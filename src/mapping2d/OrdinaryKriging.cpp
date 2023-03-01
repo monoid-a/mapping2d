@@ -36,7 +36,7 @@ UblDblMatrix OrdinaryKriging::calcMatrix()
 	return matr;
 }
 
-UblDblVec OrdinaryKriging::calcVec(double x, double y, const PointsData& data, const two_points_func& gamma)
+UblDblVec OrdinaryKriging::calcVec(double x, double y, const PointsData& data, const two_points_func& gamma) const
 {
 	return VectorCalculator::calculate(x, y, data, data.x.size() + 1, gamma,
 		[](UblDblVec& vec)
@@ -51,14 +51,14 @@ UblDblVec OrdinaryKriging::calcWeights(const UblDblMatrix& A_inv, const UblDblVe
 	return w;
 }
 
-std::vector<double> OrdinaryKriging::getWeights(double x, double y)
+std::vector<double> OrdinaryKriging::getWeights(double x, double y) const
 {
 	UblDblVec b = calcVec(x, y, mPointsData, mGamma);
 	UblDblVec w = calcWeights(mInvA, b);
 	return { w.begin() , w.end() };
 }
 
-std::vector<double> OrdinaryKriging::getVals()
+std::vector<double> OrdinaryKriging::getVals() const
 {
 	std::vector<double> res;
 	for (auto v : mPointsData.z)
@@ -66,7 +66,7 @@ std::vector<double> OrdinaryKriging::getVals()
 	return res;
 }
 
-double OrdinaryKriging::correctZ(double z)
+double OrdinaryKriging::correctZ(double z) const
 {
 	return z;
 }

@@ -16,7 +16,7 @@ UniversalKriging::~UniversalKriging()
 {
 }
 
-UblDblVec UniversalKriging::calcVec(double x, double y, const PointsData& data, const two_points_func& gamma)
+UblDblVec UniversalKriging::calcVec(double x, double y, const PointsData& data, const two_points_func& gamma) const
 {
 	return VectorCalculator::calculate(x, y, data, data.x.size() + 3, gamma,
 		[x, y](UblDblVec& vec)
@@ -33,14 +33,14 @@ UblDblVec UniversalKriging::calcWeights(const UblDblMatrix& A_inv, const UblDblV
 	return w;
 }
 
-std::vector<double> UniversalKriging::getWeights(double x, double y)
+std::vector<double> UniversalKriging::getWeights(double x, double y) const
 {
 	UblDblVec b = calcVec(x, y, mPointsData, mGamma);
 	UblDblVec w = calcWeights(mInvA, b);
 	return { w.begin() , w.end() };
 }
 
-std::vector<double> UniversalKriging::getVals()
+std::vector<double> UniversalKriging::getVals() const
 {
 	std::vector<double> res;
 	for (auto z : mPointsData.z)
@@ -74,7 +74,7 @@ UblDblMatrix UniversalKriging::calcMatrix()
 	return matr;
 }
 
-double UniversalKriging::correctZ(double z)
+double UniversalKriging::correctZ(double z) const
 {
 	return z;
 }

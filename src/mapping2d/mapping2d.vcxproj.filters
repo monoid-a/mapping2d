@@ -203,5 +203,8 @@
     <ClInclude Include="MarchingSquares.h">
       <Filter>Header Files\isoliner</Filter>
     </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

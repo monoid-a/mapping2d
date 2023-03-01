@@ -20,7 +20,7 @@ std::vector<double> Isovalues::getIsovalues(double step)
 	double max = mSurf->getZMax();
 	max = std::round(max);
 
-	int levelCount = (int) (max - min) / step;
+	int levelCount = (int) ((max - min) / step);
 
 	return getIsovalues(min, max, levelCount, step);
 }

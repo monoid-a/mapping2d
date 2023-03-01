@@ -13,6 +13,8 @@
 #include <unordered_map>
 #include <deque>
 #include <numeric>
+#include <thread>
+#include <future>
 
 #define BOOST_UBLAS_NDEBUG
 
@@ -21,6 +23,8 @@
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/optional.hpp>
 #include <boost/functional/hash.hpp>
+
+#include "config.h"
 
 #ifdef _WIN32
 	#define MAPPING2D __declspec(dllexport)

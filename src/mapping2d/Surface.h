@@ -9,10 +9,10 @@ public:
 	~Surface();
 
 	void setZ(size_t i, size_t j, double z);
-	double getZ(size_t i, size_t j);
+	double getZ(size_t i, size_t j) const;
 
-	double getZMin();
-	double getZMax();
+	double getZMin() const;
+	double getZMax() const;
 
 	size_t getNx() const;
 	size_t getNy() const;

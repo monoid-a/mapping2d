@@ -241,6 +241,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="config.h" />
     <ClInclude Include="CubicVar.h" />
     <ClInclude Include="ExponentVar.h" />
     <ClInclude Include="GaussianRbf.h" />

@@ -20,9 +20,9 @@ public:
 	{
 	}
 
-	double getZ(double x, double y)
+	double getZ(double x, double y) const
 	{
-		Impl* impl = static_cast<Impl*>(this);
+		const Impl* impl = static_cast<const Impl*>(this);
 
 		double z{ 0.0 };
 
