@@ -133,23 +133,29 @@ void calculateSurface(Surface* surface, const Interpolator& interpolator, const 
 			futures.push_back(std::async(std::launch::async, calc_range_block, 0, nx, ranges[i].first, ranges[i].second, mesh, interpolator));
 	}
 
-	if (isX)
-		futures.push_back(std::async(std::launch::async, calc_range_block, ranges[ranges.size() - 1].first, ranges[ranges.size() - 1].second, 0, ny, mesh, interpolator));
-	else
-		futures.push_back(std::async(std::launch::async, calc_range_block, 0, nx, ranges[ranges.size() - 1].first, ranges[ranges.size() - 1].second, mesh, interpolator));
+	std::vector<double> last_block = isX ?
+		calc_range_block(ranges[ranges.size() - 1].first, ranges[ranges.size() - 1].second, 0, ny, mesh, interpolator) : 
+		calc_range_block(0, nx, ranges[ranges.size() - 1].first, ranges[ranges.size() - 1].second, mesh, interpolator);
+
+	auto set_res = [](const std::vector<double>& block, Surface* surface)
+	{
+		size_t block_size = block.size() / 3;
+		for (size_t k = 0; k < block_size; ++k)
+		{
+			size_t i = (size_t)block[3 * k];
+			size_t j = (size_t)block[3 * k + 1];
+			double z = block[3 * k + 2];
+			surface->setZ(i, j, z);
+		}
+	};
 
 	for (auto& fut : futures)
 	{
 		std::vector<double> block = fut.get();
-		size_t block_size = block.size() / 3;
-		for (size_t k = 0; k < block_size; ++k)
-		{
-			size_t i = (size_t)	block[3 * k];
-			size_t j = (size_t)	block[3 * k + 1];
-			double z =			block[3 * k + 2];
-			surface->setZ(i, j, z);
-		}
+		set_res(block, surface);
 	}
+
+	set_res(last_block, surface);
 #endif
 }
 
