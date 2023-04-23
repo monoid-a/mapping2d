@@ -33,9 +33,13 @@ protected:
 	void selectMethod();
 	void selectFunction();
 	void processCtrlsOnMethodSelect();
+	void drawPointsChecked();
 	void drawGridChecked();
 	void discreteFillChecked();
 	void continuousFillChecked();
+	void saveSurface();
+	void loadSurface();
+	void calculateIsolines();
 
 private:
 	MapWidget* m_mapWidget;
@@ -56,6 +60,7 @@ private:
 	QLineEdit* m_nxEdit;
 	QLabel* m_nyLbl;
 	QLineEdit* m_nyEdit;
+	QCheckBox* m_drawPoints;
 	QCheckBox* m_drawGrid;
 	QCheckBox* m_discreteFill;
 	QCheckBox* m_continuousFill;

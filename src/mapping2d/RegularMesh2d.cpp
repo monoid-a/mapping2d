@@ -71,7 +71,7 @@ RegularMesh2d::RegularMesh2d(const Point& origin, double dx, double dy, size_t n
 {
 }
 
-RegularMesh2d::RegularMesh2d(const RegularMesh2d& mesh)	: 
+RegularMesh2d::RegularMesh2d(const RegularMesh2d& mesh) : 
 	mOrigin{ mesh.mOrigin }, 
 	mDx{ mesh.mDx }, mDy{ mesh.mDy },
 	mNx{ mesh.mNx }, mNy{ mesh.mNy },

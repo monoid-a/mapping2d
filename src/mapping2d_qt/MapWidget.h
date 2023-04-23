@@ -20,9 +20,13 @@ public:
 	~MapWidget();
 
 	void calculateSurface(PointsData* ps, MethodSettings settings, size_t nx, size_t ny);
+	void setDrawPoints(bool b);
 	void setDrawGrid(bool b);
 	void setDiscreteFill(bool b);
 	void setContinuousFill(bool b);
+	void saveSurface();
+	void loadSurface();
+	void calculateIsolines();
 
 protected:
 	void mouseReleaseEvent(QMouseEvent* event) override;
@@ -45,6 +49,8 @@ protected:
 	double inv_transform_x(double x);
 	double inv_transform_y(double y);
 
+	void initView();
+
 private:
 	double mScale;
 	double mDeltaScale;
@@ -60,6 +66,7 @@ private:
 	double mYMin;
 	double mZMin;
 	double mZMax;
+	bool mDrawPoints;
 	bool mDrawGrid;
 	bool mDiscreteFill;
 	bool mContinuousFill;

@@ -15,6 +15,7 @@
 #include <numeric>
 #include <thread>
 #include <future>
+#include <set>
 
 #define BOOST_UBLAS_NDEBUG
 

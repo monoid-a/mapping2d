@@ -18,6 +18,8 @@
 #include <boost/numeric/ublas/lu.hpp>
 
 #include <QtWidgets>
+#include <QFileDialog>
+#include <QFile>
 
 #ifdef _WIN32
 	#define MAPPING2D __declspec(dllimport)

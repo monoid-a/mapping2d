@@ -15,6 +15,7 @@ MapWidget::MapWidget(QWidget* parent) : QWidget(parent)
 	mXMin = 0.0;
 	mYMax = 0.0;
 	mYMin = 0.0;
+	mDrawPoints = true;
 	mDrawGrid = true;
 	mDiscreteFill = true;
 	mContinuousFill = false;
@@ -23,6 +24,31 @@ MapWidget::MapWidget(QWidget* parent) : QWidget(parent)
 
 MapWidget::~MapWidget()
 {
+
+}
+
+void MapWidget::initView()
+{
+	mXMax = mMesh.getXMax();
+	mYMax = mMesh.getYMax();
+
+	mXMin = mMesh.getXMin();
+	mYMin = mMesh.getYMin();
+
+	int w = width();
+	int h = height();
+
+	int screen_min = (std::min)(w, h);
+
+	mScale = (std::min)(mXMax - mXMin, mYMax - mYMin);
+
+	mScale = 0.75 * screen_min / mScale;
+
+	mDeltaScale = 0.1 * mScale;
+
+	mTranslate = { 0.5 * width() , 0.5 * height() };
+
+	mCenter = { mXMin + 0.5 * (mXMax - mXMin) , mYMin + 0.5 * (mYMax - mYMin) };
 }
 
 void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, size_t nx, size_t ny)
@@ -34,26 +60,7 @@ void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, size_t
 
 	mMesh = RegularMesh2d::calculate(*ps, nx, ny);
 
-	mXMax = mMesh.getXMax();
-	mYMax = mMesh.getYMax();
-
-	double xMin = mMesh.getXMin();
-	double yMin = mMesh.getYMin();
-
-	int w = width();
-	int h = height();
-
-	int screen_min = (std::min)(w, h);
-
-	mScale = (std::min)(mXMax - xMin, mYMax - yMin);
-
-	mScale = 0.75 * screen_min / mScale;
-
-	mDeltaScale = 0.1 * mScale;
-
-	mTranslate = { 0.5 * width() , 0.5 * height() };
-
-	mCenter = { xMin + 0.5 * (mXMax - xMin) , yMin + 0.5 * (mYMax - yMin) };
+	initView();
 
 	mSurface = Mapper::calculateSurface(mPoints, settings, nx, ny);
 
@@ -127,6 +134,12 @@ void MapWidget::mouseMoveEvent(QMouseEvent* event)
 	}
 }
 
+void MapWidget::setDrawPoints(bool b)
+{
+	mDrawPoints = b;
+	update();
+}
+
 void MapWidget::setDrawGrid(bool b)
 {
 	mDrawGrid = b;
@@ -142,6 +155,129 @@ void MapWidget::setDiscreteFill(bool b)
 void MapWidget::setContinuousFill(bool b)
 {
 	mContinuousFill = b;
+	update();
+}
+
+// write file in Surfer ASCII format
+void MapWidget::saveSurface()
+{
+	if (!mSurface)
+	{
+		QMessageBox box(QMessageBox::Icon::Critical, "Save surface", "No surface to save", QMessageBox::StandardButton::Ok);
+		box.exec();
+		return;
+	}
+
+	QString path = QFileDialog::getSaveFileName(this, "Save surface");
+
+	QFile file(path);
+	if (file.open(QFile::WriteOnly | QFile::Truncate))
+	{
+		QTextStream out(&file);
+		out << "DSAA\n";
+		
+		const RegularMesh2d& mesh = mSurface->getMesh();
+
+		size_t nx = mesh.getNx();
+		size_t ny = mesh.getNy();
+
+		out << nx << " " << ny << "\n";
+
+		double xmin = mesh.getXMin();
+		double xmax = mesh.getXMax();
+		out << xmin << " " << xmax << "\n";
+
+		double ymin = mesh.getYMin();
+		double ymax = mesh.getYMax();
+		out << ymin << " " << ymax << "\n";
+
+		double zmin = mSurface->getZMin();
+		double zmax = mSurface->getZMax();
+		out << zmin << " " << zmax << "\n";
+
+		for (size_t i = 0; i < nx; ++i)
+		{
+			for (size_t j = 0; j < ny; ++j)
+			{
+				double z = mSurface->getZ(i, j);
+				out << z;
+				if (j != ny - 1)
+					out << " ";
+			}
+			out << "\n";
+		}
+	}
+}
+
+void MapWidget::loadSurface()
+{
+	QString path = QFileDialog::getOpenFileName(this, "Load surface");
+
+	QFile file(path);
+	if (file.open(QFile::ReadOnly))
+	{
+		QTextStream in(&file);
+
+		QString str;
+		in >> str;
+		if (str.toLower() != "dsaa")
+		{
+			QMessageBox box(QMessageBox::Icon::Critical, "Load surface", "Wrong format", QMessageBox::StandardButton::Ok);
+			box.exec();
+			return;
+		}
+
+		size_t nx;
+		size_t ny;
+		in >> nx >> ny;
+
+		double xmin;
+		double xmax;
+		in >> xmin >> xmax;
+
+		double ymin;
+		double ymax;
+		in >> ymin >> ymax;
+
+		in >> mZMin >> mZMax;
+
+		double dx = (xmax - xmin) / (nx - 1);
+		double dy = (ymax - ymin) / (ny - 1);
+
+		mMesh = RegularMesh2d(Point{ xmin , ymin }, dx, dy, nx, ny, 0.0);
+
+		initView();
+
+		mSurface = std::make_unique<Surface>(mMesh);
+
+		for (size_t i = 0; i < nx; ++i)
+		{
+			for (size_t j = 0; j < ny; ++j)
+			{
+				double z;
+				in >> z;
+				mSurface->setZ(i, j, z);
+			}
+		}
+
+		mZMin = mSurface->getZMin();
+		mZMax = mSurface->getZMax();
+
+		update();
+	}
+}
+
+void MapWidget::calculateIsolines()
+{
+	if (!mSurface)
+		return;
+
+	int levelCount = 10;
+	double step = (mSurface->getZMax() - mSurface->getZMin()) / levelCount;
+
+	MarchingSquares marchSqrIsoliner(mSurface.get());
+	mIsolines = marchSqrIsoliner.calculate(mSurface->getZMin(), mSurface->getZMax(), levelCount, step);
+
 	update();
 }
 
@@ -269,16 +405,16 @@ void MapWidget::drawSurface(QPainter& painter)
 
 void MapWidget::drawPoints(QPainter& painter)
 {
-	if (!mPoints)
+	if (!mPoints || !mDrawPoints)
 		return;
 
 	Qt::BrushStyle style = Qt::SolidPattern;
 	QBrush brush(Qt::black, style);
 	painter.setBrush(brush);
 
-	size_t _size = mPoints->x.size();
+	size_t pointsCnt = mPoints->x.size();
 
-	for (size_t i = 0; i < _size; ++i)
+	for (size_t i = 0; i < pointsCnt; ++i)
 	{
 		double x = mPoints->x[i];
 		double y = mPoints->y[i];

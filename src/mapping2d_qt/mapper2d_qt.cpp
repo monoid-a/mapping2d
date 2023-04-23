@@ -4,6 +4,20 @@
 #include "../mapping2d/MethodSettings.h"
 #include "../mapping2d/Variograms.h"
 
+class MWaitCursor
+{
+public:
+	MWaitCursor()
+	{
+		QApplication::setOverrideCursor(Qt::WaitCursor);
+	}
+
+	~MWaitCursor()
+	{
+		QApplication::restoreOverrideCursor();
+	}
+};
+
 mapper2d_qt::mapper2d_qt(QWidget* parent) : QWidget(parent)
 {
 	m_mapWidget = new MapWidget(this);
@@ -51,50 +65,51 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 	ctrlLayout->setAlignment(Qt::AlignTop);
 
 	const int columnSpan = 4;
+	int column = 0;
 	QPushButton* filesBtn = new QPushButton(this);
 	filesBtn->setText("Choose data directory");
 	connect(filesBtn, &QPushButton::clicked, this, &mapper2d_qt::onFilesBtnClicked);
-	ctrlLayout->addWidget(filesBtn, 0, 0, 1, columnSpan);
+	ctrlLayout->addWidget(filesBtn, column++, 0, 1, columnSpan);
 
 	m_fileList = new QListWidget(this);
 	connect(m_fileList, &QListWidget::itemDoubleClicked, this, &mapper2d_qt::setFile);
 	m_fileList->setFixedHeight(100);
-	ctrlLayout->addWidget(m_fileList, 1, 0, 1, columnSpan);
+	ctrlLayout->addWidget(m_fileList, column++, 0, 1, columnSpan);
 
 	m_methodsCmb = new QComboBox(this);
 	for (const auto& p : m_methods)
 		m_methodsCmb->addItem(p.second, QVariant((int)p.first));
 	m_methodsCmb->setCurrentIndex(1);
-	ctrlLayout->addWidget(m_methodsCmb, 2, 0, 1, columnSpan);
+	ctrlLayout->addWidget(m_methodsCmb, column++, 0, 1, columnSpan);
 	connect(m_methodsCmb, &QComboBox::currentTextChanged, this, &mapper2d_qt::selectMethod);
 
 	m_variogramCmb = new QComboBox(this);
-	ctrlLayout->addWidget(m_variogramCmb, 3, 0, 1, columnSpan);
+	ctrlLayout->addWidget(m_variogramCmb, column++, 0, 1, columnSpan);
 	connect(m_variogramCmb, &QComboBox::currentTextChanged, this, &mapper2d_qt::createMap);
 	
 	m_param0Label = new QLabel(this);
 	m_param0Label->setText("a:");
-	ctrlLayout->addWidget(m_param0Label, 4, 0);
+	ctrlLayout->addWidget(m_param0Label, column, 0);
 	m_paramater0Edit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_paramater0Edit, 4, 1);
+	ctrlLayout->addWidget(m_paramater0Edit, column, 1);
 
 	m_param1Label = new QLabel(this);
 	m_param1Label->setText("c:");
-	ctrlLayout->addWidget(m_param1Label, 4, 2);
+	ctrlLayout->addWidget(m_param1Label, column, 2);
 	m_paramater1Edit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_paramater1Edit, 4, 3);
+	ctrlLayout->addWidget(m_paramater1Edit, column++, 3);
 
 	m_param2Label = new QLabel(this);
 	m_param2Label->setText("c0:");
-	ctrlLayout->addWidget(m_param2Label, 5, 0);
+	ctrlLayout->addWidget(m_param2Label, column, 0);
 	m_paramater2Edit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_paramater2Edit, 5, 1);
+	ctrlLayout->addWidget(m_paramater2Edit, column, 1);
 
 	m_meanLabel = new QLabel(this);
 	m_meanLabel->setText("mean:");
-	ctrlLayout->addWidget(m_meanLabel, 5, 2);
+	ctrlLayout->addWidget(m_meanLabel, column, 2);
 	m_meanEdit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_meanEdit, 5, 3);
+	ctrlLayout->addWidget(m_meanEdit, column++, 3);
 
 	m_paramater0Edit->setText(QString::number(500.0));
 	m_paramater1Edit->setText(QString::number(1.0));
@@ -110,15 +125,15 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 
 	m_nxLbl = new QLabel(this);
 	m_nxLbl->setText("Nx:");
-	ctrlLayout->addWidget(m_nxLbl, 6, 0);
+	ctrlLayout->addWidget(m_nxLbl, column, 0);
 	m_nxEdit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_nxEdit, 6, 1);
+	ctrlLayout->addWidget(m_nxEdit, column, 1);
 
 	m_nyLbl = new QLabel(this);
 	m_nyLbl->setText("Ny:");
-	ctrlLayout->addWidget(m_nyLbl, 6, 2);
+	ctrlLayout->addWidget(m_nyLbl, column, 2);
 	m_nyEdit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_nyEdit, 6, 3);
+	ctrlLayout->addWidget(m_nyEdit, column++, 3);
 
 	m_nxEdit->setText(QString::number(50));
 	m_nyEdit->setText(QString::number(50));
@@ -130,24 +145,45 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::createMap);
 	}
 
+	m_drawPoints = new QCheckBox(this);
+	m_drawPoints->setText("Draw points");
+	m_drawPoints->setChecked(true);
+	connect(m_drawPoints, &QCheckBox::clicked, this, &mapper2d_qt::drawPointsChecked);
+	ctrlLayout->addWidget(m_drawPoints, column++, 0, 1, columnSpan);
+
 	m_drawGrid = new QCheckBox(this);
 	m_drawGrid->setText("Draw grid");
 	m_drawGrid->setChecked(true);
 	connect(m_drawGrid, &QCheckBox::clicked, this, &mapper2d_qt::drawGridChecked);
-	ctrlLayout->addWidget(m_drawGrid, 7, 0, 1, columnSpan);
+	ctrlLayout->addWidget(m_drawGrid, column++, 0, 1, columnSpan);
 
 	m_discreteFill = new QCheckBox(this);
 	m_discreteFill->setText("Discrete fill");
 	m_discreteFill->setChecked(true);
 	connect(m_discreteFill, &QCheckBox::clicked, this, &mapper2d_qt::discreteFillChecked);
-	ctrlLayout->addWidget(m_discreteFill, 8, 0, 1, columnSpan);
+	ctrlLayout->addWidget(m_discreteFill, column++, 0, 1, columnSpan);
 
 	m_continuousFill = new QCheckBox(this);
 	m_continuousFill->setText("Continuous fill");
 	m_continuousFill->setChecked(false);
 	connect(m_continuousFill, &QCheckBox::clicked, this, &mapper2d_qt::continuousFillChecked);
-	ctrlLayout->addWidget(m_continuousFill, 9, 0, 1, columnSpan);
+	ctrlLayout->addWidget(m_continuousFill, column++, 0, 1, columnSpan);
 	m_continuousFill->setDisabled(true);
+
+	QPushButton* saveSurfBtn = new QPushButton(this);
+	saveSurfBtn->setText("Save surface");
+	connect(saveSurfBtn, &QPushButton::clicked, this, &mapper2d_qt::saveSurface);
+	ctrlLayout->addWidget(saveSurfBtn, column, 0, 1, 2);
+
+	QPushButton* loadSurfBtn = new QPushButton(this);
+	loadSurfBtn->setText("Load surface");
+	connect(loadSurfBtn, &QPushButton::clicked, this, &mapper2d_qt::loadSurface);
+	ctrlLayout->addWidget(loadSurfBtn, column++, 2, 1, 2);
+
+	QPushButton* calculateIsolinesBtn = new QPushButton(this);
+	calculateIsolinesBtn->setText("Calculate isolines");
+	connect(calculateIsolinesBtn, &QPushButton::clicked, this, &mapper2d_qt::calculateIsolines);
+	ctrlLayout->addWidget(calculateIsolinesBtn, column, 0, 1, columnSpan);
 
 	processCtrlsOnMethodSelect();
 }
@@ -206,6 +242,11 @@ void mapper2d_qt::processCtrlsOnMethodSelect()
 		assert(0);
 }
 
+void mapper2d_qt::drawPointsChecked()
+{
+	m_mapWidget->setDrawPoints(m_drawPoints->isChecked());
+}
+
 void mapper2d_qt::drawGridChecked()
 {
 	m_mapWidget->setDrawGrid(m_drawGrid->isChecked());
@@ -220,6 +261,22 @@ void mapper2d_qt::continuousFillChecked()
 {
 	m_mapWidget->setContinuousFill(m_continuousFill->isChecked());
 
+}
+
+void mapper2d_qt::saveSurface()
+{
+	m_mapWidget->saveSurface();
+}
+
+void mapper2d_qt::loadSurface()
+{
+	m_mapWidget->loadSurface();
+}
+
+void mapper2d_qt::calculateIsolines()
+{
+	MWaitCursor wait;
+	m_mapWidget->calculateIsolines();
 }
 
 void mapper2d_qt::onFilesBtnClicked()
@@ -278,20 +335,6 @@ void mapper2d_qt::updateFileCombo()
 	for (auto& it : list)
 		m_fileList->addItem(it.fileName());
 }
-
-class MWaitCursor
-{
-public:
-	MWaitCursor()
-	{
-		QApplication::setOverrideCursor(Qt::WaitCursor);
-	}
-
-	~MWaitCursor()
-	{
-		QApplication::restoreOverrideCursor();
-	}
-};
 
 void mapper2d_qt::createMap()
 {

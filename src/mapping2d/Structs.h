@@ -61,14 +61,19 @@ struct Node
 	size_t i;
 	size_t j;
 
-	bool operator==(const Node& other)
+	bool operator==(const Node& other) const
 	{
 		return std::tie(i, j) == std::tie(other.i, other.j);
 	}
 
-	bool operator!=(const Node& other)
+	bool operator!=(const Node& other) const
 	{
 		return std::tie(i, j) != std::tie(other.i, other.j);
+	}
+
+	bool operator<(const Node& other) const
+	{
+		return std::tie(i, j) < std::tie(other.i, other.j);
 	}
 };
 

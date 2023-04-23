@@ -24,6 +24,20 @@ enum class CellTraceVariant
 
 struct IsoStruct
 {
+	IsoStruct()
+	{
+	}
+
+	bool inAdjacent(const Node& node)
+	{
+		for (const Node& adjNode : adj_nodes)
+		{
+			if (adjNode == node)
+				return true;
+		}
+		return false;
+	}
+
 	Segment seg;
 	Node node;
 	CellTraceVariant variant;
@@ -42,8 +56,86 @@ struct size_t_pair_hash
 	}
 };
 
+bool isSaddle(CellTraceVariant variant)
+{
+	return variant == CellTraceVariant::SaddleFirst || variant == CellTraceVariant::SaddleSecond;
+}
+
 struct IsolineBuilder
 {
+	class PreIsoline
+	{
+	public:
+		PreIsoline()
+		{
+		}
+
+		~PreIsoline()
+		{
+		}
+
+		void add(const Segment& seg)
+		{
+			if (mPoints.empty())
+			{
+				push_back(seg.bgn);
+				push_back(seg.end);
+			}
+			else
+			{
+				if (mPoints[mPoints.size() - 1] == seg.bgn || mPoints[mPoints.size() - 1] == seg.end)
+				{
+					if (mPoints[mPoints.size() - 1] == seg.bgn)
+						push_back(seg.end);
+					else
+						push_back(seg.bgn);
+				}
+				else if (mPoints[0] == seg.bgn || mPoints[0] == seg.end)
+				{
+					if (mPoints[0] == seg.bgn)
+						push_front(seg.end);
+					else
+						push_front(seg.bgn);
+				}
+			}
+		}
+
+		void push_front(Point point)
+		{
+			mPoints.push_front(point);
+		}
+
+		void push_back(Point point)
+		{
+			mPoints.push_back(point);
+		}
+
+		Point get(size_t index) const
+		{
+			return mPoints[index];
+		}
+
+		size_t getSize() const
+		{
+			return mPoints.size();
+		}
+
+		void reverse()
+		{
+			std::reverse(mPoints.begin(), mPoints.end());
+		}
+
+		Isoline getIsoline()
+		{
+			std::vector<Point> points{ mPoints.begin(), mPoints.end() };
+			Isoline res(std::move(points));
+			mPoints.clear();
+			return res;
+		}
+	private:
+		std::deque<Point> mPoints;
+	};
+
 	IsolineBuilder(const RegularMesh2d& mesh) : mesh(mesh)
 	{
 	}
@@ -72,9 +164,30 @@ struct IsolineBuilder
 			cells_on_frame.push_back(isoSt);
 	}
 
+	bool isEq(const IsoStruct& iso0, const IsoStruct& iso1)
+	{
+		auto iseqvec = [](const std::vector<Node>& nodes0, const std::vector<Node>& nodes1) -> bool
+		{
+			if (nodes0.size() != nodes1.size())
+				return false;
+
+			std::set<Node> nodes1set = { nodes1.begin(), nodes1.end() };
+
+			for (const Node& node : nodes0)
+			{
+				if (nodes1set.find(node) == nodes1set.end())
+					return false;
+			}
+
+			return true;
+		};
+
+		return iso0.node == iso1.node && iseqvec(iso0.adj_nodes, iso1.adj_nodes);
+	}
+
 	Isoline traceIsoline(IsoStruct& init_is)
 	{
-		Isoline iso;
+		PreIsoline preiso;
 		init_is.visited = true;
 		IsoStruct curr_iso_str = init_is;
 
@@ -82,7 +195,7 @@ struct IsolineBuilder
 		Node next_node{ INT_MAX, INT_MAX };
 		while (true)
 		{
-			iso.add(curr_iso_str.seg);
+			preiso.add(curr_iso_str.seg);
 			std::vector<Node> adj_nodes = curr_iso_str.adj_nodes;
 			
 			for (auto node : adj_nodes)
@@ -113,14 +226,14 @@ struct IsolineBuilder
 				}
 			}
 
-			if (next_node == init_is.node)
+			if (next_node == init_is.node && init_is.inAdjacent(curr_iso_str.node))
 				break;
 		}
 
-		if (next_node == init_is.node && iso.getSize() && iso.get(0) != iso.get(iso.getSize() - 1))
-			iso.push_back(iso.get(0));
+		if (next_node == init_is.node && preiso.getSize() && preiso.get(0) != preiso.get(preiso.getSize() - 1))
+			preiso.push_back(preiso.get(0));
 
-		return iso;
+		return preiso.getIsoline();
 	}
 
 	std::vector<Isoline> getIsolines()
