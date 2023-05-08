@@ -27,7 +27,7 @@ public:
 		double z{ 0.0 };
 
 		const std::vector<double>& w = InterpolAccessor::getWeights(impl, x, y);
-		const std::vector<double>& v = InterpolAccessor::getVals(impl);
+		const std::vector<double>& v = InterpolAccessor::getVals(impl, x, y);
 
 		for (size_t i = 0; i < v.size(); ++i)
 			z += w[i] * v[i];

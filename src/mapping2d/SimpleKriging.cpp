@@ -34,9 +34,10 @@ std::vector<double> SimpleKriging::getWeights(double x, double y) const
 	return { w.begin() , w.end() };
 }
 
-std::vector<double> SimpleKriging::getVals() const
+std::vector<double> SimpleKriging::getVals(double x, double y) const
 {
 	std::vector<double> res;
+	res.reserve(mPointsData.z.size());
 	for (auto z : mPointsData.z)
 		res.push_back(z - m_mean);
 	return res;

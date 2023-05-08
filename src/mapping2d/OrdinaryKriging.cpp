@@ -31,6 +31,7 @@ UblDblMatrix OrdinaryKriging::calcMatrix()
 				matr(k, size) = 1;
 				matr(size, k) = matr(k, size);
 			}
+			matr(size, size) = 0.0;
 		});
 
 	return matr;
@@ -58,9 +59,10 @@ std::vector<double> OrdinaryKriging::getWeights(double x, double y) const
 	return { w.begin() , w.end() };
 }
 
-std::vector<double> OrdinaryKriging::getVals() const
+std::vector<double> OrdinaryKriging::getVals(double x, double y) const
 {
 	std::vector<double> res;
+	res.reserve(mPointsData.z.size());
 	for (auto v : mPointsData.z)
 		res.push_back(v);
 	return res;

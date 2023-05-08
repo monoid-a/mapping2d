@@ -32,6 +32,7 @@ mapper2d_qt::mapper2d_qt(QWidget* parent) : QWidget(parent)
 		{ Method::UniversalKriging , "Universal kriging" },
 		{ Method::RBF , "RBF" },
 		{ Method::InverseDistanceWeighting , "Inverse distance weighting" },
+		{ Method::ThinPlateSpline , "Thin plate spline" },
 	};
 
 	m_variograms =
@@ -237,6 +238,14 @@ void mapper2d_qt::processCtrlsOnMethodSelect()
 		m_variogramCmb->setEnabled(false);
 		m_paramater0Edit->setEnabled(true);
 		m_paramater0Edit->setText("2");
+	}
+	else if (method == Method::ThinPlateSpline)
+	{
+		m_variogramCmb->setEnabled(false);
+		m_paramater0Edit->setEnabled(false);
+		m_paramater1Edit->setEnabled(false);
+		m_paramater2Edit->setEnabled(false);
+		m_meanEdit->setEnabled(false);
 	}
 	else
 		assert(0);

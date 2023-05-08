@@ -199,6 +199,14 @@ std::unique_ptr<Surface> Mapper::calculateSurface(PointsData* ps, MethodSettings
 		::calculateSurface(surface.get(), interpoler, mesh, nx, ny);
 		break;
 	}
+	case Method::ThinPlateSpline:
+	{
+		ThinPlateSpline interpoler(*ps);
+		::calculateSurface(surface.get(), interpoler, mesh, nx, ny);
+		break;
+	}
+	default:
+		assert(0);
 	}
 
 	return surface;

@@ -40,9 +40,10 @@ std::vector<double> UniversalKriging::getWeights(double x, double y) const
 	return { w.begin() , w.end() };
 }
 
-std::vector<double> UniversalKriging::getVals() const
+std::vector<double> UniversalKriging::getVals(double x, double y) const
 {
 	std::vector<double> res;
+	res.reserve(mPointsData.z.size());
 	for (auto z : mPointsData.z)
 		res.push_back(z);
 	return res;
@@ -56,7 +57,8 @@ UblDblMatrix UniversalKriging::calcMatrix()
 	const size_t ny = ys.size() + 3;
 	const size_t size = xs.size();
 
-	UblDblMatrix matr = MatrixCalculator::calcMatrix(xs, ys, nx, ny, mGamma, [&xs, &ys](UblDblMatrix& matr)
+	UblDblMatrix matr = MatrixCalculator::calcMatrix(xs, ys, nx, ny, mGamma, 
+		[&xs, &ys](UblDblMatrix& matr)
 		{
 			for (size_t k = 0, p_cnt = xs.size(); k < p_cnt; ++k)
 			{

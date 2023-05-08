@@ -108,6 +108,12 @@
     <ClCompile Include="MarchingSquares.cpp">
       <Filter>Source Files\isoliner</Filter>
     </ClCompile>
+    <ClCompile Include="ThinPlateSplineRbf.cpp">
+      <Filter>Source Files\rbfs</Filter>
+    </ClCompile>
+    <ClCompile Include="ThinPlateSpline.cpp">
+      <Filter>Source Files\interpolators</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LinearEstimator.h">
@@ -205,6 +211,12 @@
     </ClInclude>
     <ClInclude Include="config.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThinPlateSplineRbf.h">
+      <Filter>Header Files\rbfs</Filter>
+    </ClInclude>
+    <ClInclude Include="ThinPlateSpline.h">
+      <Filter>Header Files\interpolators</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

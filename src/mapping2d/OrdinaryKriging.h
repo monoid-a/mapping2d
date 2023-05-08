@@ -18,7 +18,7 @@ protected:
 	// interpol accessor
 	UblDblMatrix calcMatrix();
 	std::vector<double> getWeights(double x, double y) const;
-	std::vector<double> getVals() const;
+	std::vector<double> getVals(double x, double y) const;
 	double correctZ(double z) const;
 
 	UblDblVec calcVec(double x, double y, const PointsData& data, const two_points_func& gamma) const;

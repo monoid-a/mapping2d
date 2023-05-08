@@ -4,7 +4,7 @@
 
 RbfInterpolator::RbfInterpolator(const PointsData& data, const two_points_func& cov) : LinearEstimator(data), Variogramer(cov)
 {
-
+	calcWeights();
 }
 
 RbfInterpolator::RbfInterpolator(PointsData&& data, const two_points_func& cov) : LinearEstimator(std::move(data)), Variogramer(cov)
@@ -26,29 +26,35 @@ UblDblMatrix RbfInterpolator::calcMatrix()
 	return MatrixCalculator::calcMatrix(xs, ys, nx, ny, mGamma, nullptr);
 }
 
+void RbfInterpolator::calcWeights()
+{
+	if (mWeights.empty())
+	{
+		UblDblVec f(mPointsData.z.size(), 0.0);
+		for (size_t i = 0, p_cnt = mPointsData.z.size(); i < p_cnt; ++i)
+			f[i] = mPointsData.z[i];
+
+		auto ws = prod(mInvA, f);
+
+		mWeights.reserve(ws.size());
+		for (auto w : ws)
+			mWeights.push_back(w);
+	}
+}
+
 std::vector<double> RbfInterpolator::getWeights(double x, double y) const
 {
-	UblDblVec vec(mPointsData.x.size(), 0.0);
+	return mWeights;
+}
+
+std::vector<double> RbfInterpolator::getVals(double x, double y) const
+{
+	std::vector<double> vec(mPointsData.x.size(), 0.0);
 
 	for (size_t i = 0, p_cnt = mPointsData.x.size(); i < p_cnt; ++i)
 		vec[i] = mGamma(Point{ x , y }, Point{ mPointsData.x[i] , mPointsData.y[i] });
 
-	return { vec.begin() , vec.end() };
-}
-
-std::vector<double> RbfInterpolator::getVals() const
-{
-	UblDblVec f(mPointsData.z.size(), 0.0);
-	for (size_t i = 0, p_cnt = mPointsData.z.size(); i < p_cnt; ++i)
-		f[i] = mPointsData.z[i];
-
-	auto w = prod(mInvA, f);
-
-	std::vector<double> vv;
-	for (auto v : w)
-		vv.push_back(v);
-
-	return vv;
+	return vec;
 }
 
 double RbfInterpolator::correctZ(double z) const

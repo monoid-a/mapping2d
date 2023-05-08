@@ -5,3 +5,4 @@
 #include "UniversalKriging.h"
 #include "RbfInterpolator.h"
 #include "InverseDistanceWeighting.h"
+#include "ThinPlateSpline.h"

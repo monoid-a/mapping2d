@@ -7,6 +7,7 @@ enum class Method
 	UniversalKriging,
 	RBF,
 	InverseDistanceWeighting,
+	ThinPlateSpline,
 };
 
 enum class Function

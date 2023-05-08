@@ -16,9 +16,9 @@ public:
 	}
 
 	template<typename Impl>
-	static std::vector<double> getVals(Impl* impl)
+	static std::vector<double> getVals(Impl* impl, double x, double y)
 	{
-		return impl->getVals();
+		return impl->getVals(x, y);
 	}
 
 	template<typename Impl>

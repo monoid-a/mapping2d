@@ -16,7 +16,7 @@ public:
 
 protected:
 	std::vector<double> getWeights(double x, double y) const;
-	std::vector<double> getVals() const;
+	std::vector<double> getVals(double x, double y) const;
 	double correctZ(double z) const;
 
 private:
