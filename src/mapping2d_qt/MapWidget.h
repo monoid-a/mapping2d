@@ -26,7 +26,7 @@ public:
 	void setContinuousFill(bool b);
 	void saveSurface();
 	void loadSurface();
-	void calculateIsolines();
+	void calculateAndUpdateIsolines();
 
 protected:
 	void mouseReleaseEvent(QMouseEvent* event) override;
@@ -50,6 +50,8 @@ protected:
 	double inv_transform_y(double y);
 
 	void initView();
+
+	void calculateIsolines();
 
 private:
 	double mScale;

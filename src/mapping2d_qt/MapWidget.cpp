@@ -64,11 +64,7 @@ void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, size_t
 
 	mSurface = Mapper::calculateSurface(mPoints, settings, nx, ny);
 
-	int levelCount = 10;
-	double step = (mSurface->getZMax() - mSurface->getZMin()) / levelCount;
-
-	MarchingSquares marchSqrIsoliner(mSurface.get());
-	mIsolines = marchSqrIsoliner.calculate(mSurface->getZMin(), mSurface->getZMax(), levelCount, step);
+	calculateIsolines();
 
 	mZMin = mSurface->getZMin();
 	mZMax = mSurface->getZMax();
@@ -267,18 +263,33 @@ void MapWidget::loadSurface()
 	}
 }
 
+void MapWidget::calculateAndUpdateIsolines()
+{
+	if (!mSurface)
+		return;
+
+	calculateIsolines();
+
+	update();
+}
+
 void MapWidget::calculateIsolines()
 {
 	if (!mSurface)
 		return;
 
 	int levelCount = 10;
-	double step = (mSurface->getZMax() - mSurface->getZMin()) / levelCount;
+
+	double minz = mSurface->getZMin();
+	double maxz = mSurface->getZMax();
+
+	minz = std::floor(minz);
+	maxz = std::floor(maxz);
+
+	double step = (maxz - minz) / (levelCount - 1);
 
 	MarchingSquares marchSqrIsoliner(mSurface.get());
-	mIsolines = marchSqrIsoliner.calculate(mSurface->getZMin(), mSurface->getZMax(), levelCount, step);
-
-	update();
+	mIsolines = marchSqrIsoliner.calculate(minz, maxz, levelCount - 1, step);
 }
 
 double MapWidget::inv_transform_x(double x)

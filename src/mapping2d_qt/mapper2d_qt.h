@@ -39,7 +39,7 @@ protected:
 	void continuousFillChecked();
 	void saveSurface();
 	void loadSurface();
-	void calculateIsolines();
+	void calculateAndUpdateIsolines();
 
 private:
 	MapWidget* m_mapWidget;

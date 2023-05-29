@@ -183,7 +183,7 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 
 	QPushButton* calculateIsolinesBtn = new QPushButton(this);
 	calculateIsolinesBtn->setText("Calculate isolines");
-	connect(calculateIsolinesBtn, &QPushButton::clicked, this, &mapper2d_qt::calculateIsolines);
+	connect(calculateIsolinesBtn, &QPushButton::clicked, this, &mapper2d_qt::calculateAndUpdateIsolines);
 	ctrlLayout->addWidget(calculateIsolinesBtn, column, 0, 1, columnSpan);
 
 	processCtrlsOnMethodSelect();
@@ -282,10 +282,10 @@ void mapper2d_qt::loadSurface()
 	m_mapWidget->loadSurface();
 }
 
-void mapper2d_qt::calculateIsolines()
+void mapper2d_qt::calculateAndUpdateIsolines()
 {
 	MWaitCursor wait;
-	m_mapWidget->calculateIsolines();
+	m_mapWidget->calculateAndUpdateIsolines();
 }
 
 void mapper2d_qt::onFilesBtnClicked()
