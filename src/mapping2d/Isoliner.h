@@ -79,13 +79,14 @@ public:
 			for (size_t i = 0; i < val_blocks.size() - 1; ++i)
 				futures.push_back(std::async(std::launch::async, calc_iso_block, val_blocks[i], impl));
 
+			auto thread_res = calc_iso_block(val_blocks[val_blocks.size() - 1], impl);
+
 			for (size_t i = 0; i < futures.size(); ++i)
 			{
 				auto thread_res = futures[i].get();
 				res.insert(res.end(), thread_res.begin(), thread_res.end());
 			}
 
-			auto thread_res = calc_iso_block(val_blocks[val_blocks.size() - 1], impl);
 			res.insert(res.end(), thread_res.begin(), thread_res.end());
 #endif
 		}
