@@ -383,25 +383,6 @@ void MapWidget::drawSurface(QPainter& painter)
 	double dx = mMesh.getDx();
 	double dy = mMesh.getDy();
 
-	Point origin = mMesh.getXY(0, 0);
-	Point last = mMesh.getXY(nx - 1, ny - 1);
-
-	double orx = transform_x(origin.x);
-	double ory = transform_y(origin.y);
-
-	double lastx = transform_x(last.x);
-	double lasty = transform_y(last.y);
-
-	auto cut_x = [orx, lastx](double x) -> double
-	{
-		return (std::max)((std::min)(x, lastx), orx);
-	};
-
-	auto cut_y = [ory, lasty](double y) -> double
-	{
-		return (std::max)((std::min)(y, lasty), ory);
-	};
-
 	for (size_t i = 0; i < nx; i++)
 	{
 		for (size_t j = 0; j < ny; j++)
@@ -420,12 +401,7 @@ void MapWidget::drawSurface(QPainter& painter)
 			double dx = x1 - x0;
 			double dy = y1 - y0;
 
-			x0 = cut_x(x0 - 0.5 * dx);
-			y0 = cut_x(y0 - 0.5 * dy);
-			x1 = cut_x(x1 - 0.5 * dx);
-			y1 = cut_x(y1 - 0.5 * dy);
-
-			QRectF rect(QPointF(x0, y0), QPointF(x1, y1));
+			QRectF rect(x0 - 0.5 * (qreal)dx, y0 - 0.5 * (qreal)dy, (qreal)dx, (qreal)dy);
 
 			double z = mSurface->getZ(i, j);
 			double hue = (240.0 / 360.0) * (mZMax - z) / (mZMax - mZMin);
