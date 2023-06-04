@@ -401,7 +401,23 @@ void MapWidget::drawSurface(QPainter& painter)
 			double dx = x1 - x0;
 			double dy = y1 - y0;
 
-			QRectF rect(x0 - 0.5 * (qreal)dx, y0 - 0.5 * (qreal)dy, (qreal)dx, (qreal)dy);
+			if (i > 0)
+				x0 -= 0.5 * (qreal)dx;
+			if (j > 0)
+				y0 -= 0.5 * (qreal)dy;
+
+			x1 -= 0.5 * (qreal)dx;
+			y1 -= 0.5 * (qreal)dy;
+
+			if (i == nx - 1)
+				x1 -= 0.5 * (qreal)dx;
+			if (j == ny - 1)
+				y1 -= 0.5 * (qreal)dy;
+
+			QPointF pf0(x0, y0);
+			QPointF pf1(x1, y1);
+
+			QRectF rect(pf0, pf1);
 
 			double z = mSurface->getZ(i, j);
 			double hue = (240.0 / 360.0) * (mZMax - z) / (mZMax - mZMin);
