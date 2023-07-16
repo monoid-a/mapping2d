@@ -21,6 +21,9 @@ class mapper2d_qt : public QWidget
 public:
 	mapper2d_qt(QWidget* parent = Q_NULLPTR);
 
+protected slots:
+	void onSurfCalculated(std::pair<double, double> minmax);
+
 protected:
 	void fillCtrlLayout(QGridLayout* ctrlLayout);
 
@@ -64,6 +67,9 @@ private:
 	QCheckBox* m_drawGrid;
 	QCheckBox* m_discreteFill;
 	QCheckBox* m_continuousFill;
+	QLineEdit* m_isoMinValEdit;
+	QLineEdit* m_isoMaxValEdit;
+	QLineEdit* m_isoCntValEdit;
 	std::vector<std::pair<Method, QString>> m_methods;
 	std::vector<std::pair<Function, QString>> m_variograms;
 	std::vector<std::pair<Function, QString>> m_rbfs;

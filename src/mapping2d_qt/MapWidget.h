@@ -26,7 +26,11 @@ public:
 	void setContinuousFill(bool b);
 	void saveSurface();
 	void loadSurface();
-	void calculateAndUpdateIsolines();
+	void calculateAndUpdateIsolines(double minz, double maxz, int levelCount);
+
+signals:
+	void onSurfCalculated(std::pair<double, double> minmax);
+	void onSurfLoaded(std::pair<double, double> minmax);
 
 protected:
 	void mouseReleaseEvent(QMouseEvent* event) override;
@@ -51,7 +55,7 @@ protected:
 
 	void initView();
 
-	void calculateIsolines();
+	void calculateIsolines(double minz, double maxz, int levelCount);
 
 private:
 	double mScale;

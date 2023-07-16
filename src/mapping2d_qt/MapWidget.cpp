@@ -64,12 +64,12 @@ void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, size_t
 
 	mSurface = Mapper::calculateSurface(mPoints, settings, nx, ny);
 
-	calculateIsolines();
-
 	mZMin = mSurface->getZMin();
 	mZMax = mSurface->getZMax();
 
 	mPrevPos = std::make_pair(-1, -1);
+
+	emit onSurfCalculated(std::make_pair(mZMin, mZMax));
 }
 
 void MapWidget::mouseReleaseEvent(QMouseEvent* event)
@@ -259,32 +259,26 @@ void MapWidget::loadSurface()
 		mZMin = mSurface->getZMin();
 		mZMax = mSurface->getZMax();
 
+		emit onSurfLoaded(std::make_pair(mZMin, mZMax));
+
 		update();
 	}
 }
 
-void MapWidget::calculateAndUpdateIsolines()
+void MapWidget::calculateAndUpdateIsolines(double minz, double maxz, int levelCount)
 {
 	if (!mSurface)
 		return;
 
-	calculateIsolines();
+	calculateIsolines(minz, maxz, levelCount);
 
 	update();
 }
 
-void MapWidget::calculateIsolines()
+void MapWidget::calculateIsolines(double minz, double maxz, int levelCount)
 {
 	if (!mSurface)
 		return;
-
-	int levelCount = 10;
-
-	double minz = mSurface->getZMin();
-	double maxz = mSurface->getZMax();
-
-	minz = std::floor(minz);
-	maxz = std::floor(maxz);
 
 	double step = (maxz - minz) / (levelCount - 1);
 

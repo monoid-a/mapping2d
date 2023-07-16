@@ -181,10 +181,49 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 	connect(loadSurfBtn, &QPushButton::clicked, this, &mapper2d_qt::loadSurface);
 	ctrlLayout->addWidget(loadSurfBtn, column++, 2, 1, 2);
 
+	auto isoMinValLbl = new QLabel(this);
+	isoMinValLbl->setText("Isoline min value:");
+	ctrlLayout->addWidget(isoMinValLbl, column, 0, 1, 2);
+	m_isoMinValEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(m_isoMinValEdit, column++, 2, 1, 2);
+
+	auto isoMaxValLbl = new QLabel(this);
+	isoMaxValLbl->setText("Isoline max value:");
+	ctrlLayout->addWidget(isoMaxValLbl, column, 0, 1, 2);
+	m_isoMaxValEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(m_isoMaxValEdit, column++, 2, 1, 2);
+
+	auto isoCountLbl = new QLabel(this);
+	isoCountLbl->setText("Isoline count:");
+	ctrlLayout->addWidget(isoCountLbl, column, 0, 1, 2);
+	m_isoCntValEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(m_isoCntValEdit, column++, 2, 1, 2);
+
+	for (auto edit : { m_isoMinValEdit , m_isoMaxValEdit , m_isoCntValEdit })
+	{
+		if (edit != m_isoCntValEdit)
+		{
+			auto dv = new QDoubleValidator(edit);
+			edit->setValidator(dv);
+		}
+		else
+		{
+			auto dv = new QIntValidator(edit);
+			edit->setValidator(dv);
+		}
+
+		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::calculateAndUpdateIsolines);
+	}
+
+	m_isoCntValEdit->setText("10");
+
 	QPushButton* calculateIsolinesBtn = new QPushButton(this);
 	calculateIsolinesBtn->setText("Calculate isolines");
 	connect(calculateIsolinesBtn, &QPushButton::clicked, this, &mapper2d_qt::calculateAndUpdateIsolines);
 	ctrlLayout->addWidget(calculateIsolinesBtn, column, 0, 1, columnSpan);
+
+	connect(m_mapWidget, &MapWidget::onSurfCalculated, this, &mapper2d_qt::onSurfCalculated);
+	connect(m_mapWidget, &MapWidget::onSurfLoaded, this, &mapper2d_qt::onSurfCalculated);
 
 	processCtrlsOnMethodSelect();
 }
@@ -269,7 +308,6 @@ void mapper2d_qt::discreteFillChecked()
 void mapper2d_qt::continuousFillChecked()
 {
 	m_mapWidget->setContinuousFill(m_continuousFill->isChecked());
-
 }
 
 void mapper2d_qt::saveSurface()
@@ -284,8 +322,28 @@ void mapper2d_qt::loadSurface()
 
 void mapper2d_qt::calculateAndUpdateIsolines()
 {
+	QString minz_str = m_isoMinValEdit->text();
+	minz_str.replace(",", ".");
+	double minz = minz_str.toDouble();
+
+	QString maxz_str = m_isoMaxValEdit->text();
+	maxz_str.replace(",", ".");
+	double maxz = maxz_str.toDouble();
+
+	QString isocnt_str = m_isoCntValEdit->text();
+	int cntlvl = isocnt_str.toInt();
+
 	MWaitCursor wait;
-	m_mapWidget->calculateAndUpdateIsolines();
+	m_mapWidget->calculateAndUpdateIsolines(minz, maxz, cntlvl);
+}
+
+void mapper2d_qt::onSurfCalculated(std::pair<double, double> minmax)
+{
+	double minz = std::floor(minmax.first);
+	double maxz = std::round(minmax.second);
+	m_isoMinValEdit->setText(QString::number(minz));
+	m_isoMaxValEdit->setText(QString::number(maxz));
+	calculateAndUpdateIsolines();
 }
 
 void mapper2d_qt::onFilesBtnClicked()
