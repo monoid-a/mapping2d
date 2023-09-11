@@ -8,11 +8,15 @@
 #include "../mapping2d/Surface.h"
 
 class RegularMesh2d;
-struct  PointsData;
+struct PointsData;
 class Surface;
+class Scale;
 
 class MapWidget : public QWidget
 {
+	using super = QWidget;
+	friend class Scale;
+
 	Q_OBJECT
 
 public:
@@ -58,7 +62,7 @@ protected:
 	void calculateIsolines(double minz, double maxz, int levelCount);
 
 private:
-	double mScale;
+	double mScaleVal;
 	double mDeltaScale;
 	std::pair<double, double> mTranslate;
 	std::pair<double, double> mCenter;
@@ -77,4 +81,5 @@ private:
 	bool mDiscreteFill;
 	bool mContinuousFill;
 	std::pair<int, int> mPrevPos;
+	std::unique_ptr<Scale> mScale;
 };

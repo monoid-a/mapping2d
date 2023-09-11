@@ -4,9 +4,166 @@
 #include "../mapping2d/Variograms.h"
 #include "../mapping2d/Mapper.h"
 
+
+class Scale
+{
+public:
+	Scale()
+	{
+		dpiX = -1;
+		dpiY = -1;
+	}
+
+	int mmToDotsX(int mm)
+	{
+		return dpiX != -1 ? dpiX * mm : mm;
+	}
+
+	int mmToDotsY(int mm)
+	{
+		return dpiY != -1 ? dpiY * mm : mm;
+	}
+
+	void draw(QPainter& painter, MapWidget* client)
+	{
+		if (dpiX == -1 && dpiY == -1)
+		{
+			dpiX = (int)(painter.device()->logicalDpiX() / 25.4); // dpi in mm
+			dpiY = (int)(painter.device()->logicalDpiY() / 25.4); // dpi in mm
+		}
+
+		auto oldBrush = painter.brush();
+		auto oldPen = painter.pen();
+		auto oldFont = painter.font();
+
+		painter.setFont(QFont("Arial", 6));
+
+		int w = client->width();
+		int h = client->height();
+
+		painter.save();
+
+		int scale_width_x = mmToDotsX(10);
+
+		int horiz_x0 = scale_width_x;
+		int horiz_y0 = h - scale_width_x;
+
+		int horiz_x1 = w - 1;
+		int horiz_y1 = h - 1;
+
+		auto draw_rect = [](QPainter& painter, int x0, int y0, int x1, int y1) -> void
+			{
+				QPoint p0(x0, y0);
+				QPoint p1(x1, y1);
+
+				QRect rect(p0, p1);
+
+				QColor bkgClr = QApplication::palette().color(QPalette::Button);
+				Qt::BrushStyle brushStyle = Qt::SolidPattern;
+				QBrush brush(bkgClr, brushStyle);
+
+				QColor lineClr = QApplication::palette().color(QPalette::PlaceholderText);
+				painter.setPen(lineClr);
+				painter.fillRect(rect, brush);
+
+				painter.drawLine(x0, y0, x0, y1);
+				painter.drawLine(x0, y1, x1, y1);
+				painter.drawLine(x1, y1, x1, y0);
+				painter.drawLine(x1, y0, x0, y0);
+			};
+
+		draw_rect(painter, horiz_x0, horiz_y0, horiz_x1, horiz_y1);
+
+		int vert_x0 = 0;
+		int vert_y0 = 0;
+
+		int vert_x1 = scale_width_x;
+		int vert_y1 = h - scale_width_x;
+
+		draw_rect(painter, vert_x0, vert_y0, vert_x1, vert_y1);
+
+		draw_rect(painter, vert_x0, vert_y1, horiz_x0, horiz_y1);
+
+		const int small_hairline_length = mmToDotsX(3);
+		const int big_hairline_length = mmToDotsX(5);
+		const int hairline_gap = mmToDotsX(5);
+
+		const size_t horiz_hairline_count = (w - scale_width_x) / hairline_gap;
+
+		painter.setPen(QColor(0, 0, 0));
+
+		// horiz scale
+		for (size_t ind = 0; ind < horiz_hairline_count; ++ind)
+		{
+			int x = horiz_x0 + ind * hairline_gap;
+			int y = horiz_y0 + small_hairline_length;
+			bool bigLine = ind % 5 == 0;
+			if (bigLine)
+				y = horiz_y0 + big_hairline_length;
+			painter.drawLine(x, horiz_y0, x, y);
+
+			if (bigLine && ind != 0 && ind != horiz_hairline_count - 1)
+			{
+				double x_for_title = client->inv_transform_x(x);
+
+				QString text = QString::number(x_for_title);
+				
+				QRect br = painter.boundingRect(0, 0, 0, 0, 0, text);
+
+				int offset_x = -br.width() / 2;
+				int offset_y = br.height();
+
+				painter.drawText(QPoint(x + offset_x, y + offset_y), text);
+			}
+		}
+
+		const size_t vert_hairline_count = (h - scale_width_x) / hairline_gap;
+
+		// vert scale
+		for (size_t ind = 0; ind < vert_hairline_count; ++ind)
+		{
+			int x = horiz_x0;
+			int y = horiz_y0 - ind * hairline_gap;
+			int x1 = x - small_hairline_length;
+			bool bigLine = ind % 5 == 0;
+			if (bigLine)
+				x1 = x - big_hairline_length;
+			painter.drawLine(x, y, x1, y);
+
+			if (bigLine && ind != 0 && ind != horiz_hairline_count - 1)
+			{
+				double y_for_title = client->inv_transform_y(y);
+
+				QString text = QString::number(y_for_title);
+
+				QRect br = painter.boundingRect(0, 0, 0, 0, 0, text);
+
+				int offset_x = br.height();
+				int offset_y = br.width() / 2;
+				QPoint trn(offset_x, y + offset_y);
+				painter.translate(trn);
+				painter.rotate(-90.0);
+				painter.drawText(QPoint(0, 0), text);
+				painter.rotate(90.0);
+				painter.translate(-trn);
+			}
+		}
+
+		painter.setBrush(oldBrush);
+		painter.setPen(oldPen);
+		painter.setFont(oldFont);
+
+		painter.restore();
+	}
+
+private:
+	int dpiX;
+	int dpiY;
+};
+
 MapWidget::MapWidget(QWidget* parent) : QWidget(parent)
 {
-	mScale = 1.0;
+	mScaleVal = 1.0;
 	mDeltaScale = 1.0;
 	mPoints = nullptr;
 	mSurface = nullptr;
@@ -20,6 +177,7 @@ MapWidget::MapWidget(QWidget* parent) : QWidget(parent)
 	mDiscreteFill = true;
 	mContinuousFill = false;
 	mPrevPos = std::make_pair(-1, -1);
+	mScale = std::make_unique<Scale>();
 }
 
 MapWidget::~MapWidget()
@@ -40,11 +198,11 @@ void MapWidget::initView()
 
 	int screen_min = (std::min)(w, h);
 
-	mScale = (std::min)(mXMax - mXMin, mYMax - mYMin);
+	mScaleVal = (std::min)(mXMax - mXMin, mYMax - mYMin);
 
-	mScale = 0.75 * screen_min / mScale;
+	mScaleVal = 0.75 * screen_min / mScaleVal;
 
-	mDeltaScale = 0.1 * mScale;
+	mDeltaScale = 0.1 * mScaleVal;
 
 	mTranslate = { 0.5 * width() , 0.5 * height() };
 
@@ -288,22 +446,22 @@ void MapWidget::calculateIsolines(double minz, double maxz, int levelCount)
 
 double MapWidget::inv_transform_x(double x)
 {
-	return mCenter.first + (x - mTranslate.first) / mScale;
+	return mCenter.first + (x - mTranslate.first) / mScaleVal;
 }
 
 double MapWidget::inv_transform_y(double y)
 {
-	return mCenter.second - (y - mTranslate.second) / mScale;
+	return mCenter.second - (y - mTranslate.second) / mScaleVal;
 }
 
 double MapWidget::transform_x(double x)
 {
-	return (x - mCenter.first) * mScale + mTranslate.first;
+	return (x - mCenter.first) * mScaleVal + mTranslate.first;
 }
 
 double MapWidget::transform_y(double y)
 {
-	return (-y + mCenter.second) * mScale + mTranslate.second;
+	return (-y + mCenter.second) * mScaleVal + mTranslate.second;
 }
 
 void MapWidget::drawGrid(QPainter& painter)
@@ -462,7 +620,7 @@ void MapWidget::drawPoints(QPainter& painter)
 
 void MapWidget::drawScale(QPainter& painter)
 {
-
+	mScale->draw(painter, this);
 }
 
 void MapWidget::drawIsolines(QPainter& painter)
@@ -523,14 +681,14 @@ void MapWidget::drawScene()
 	drawIsobands(painter);
 	drawPoints(painter);
 	drawGrid(painter);
-	drawScale(painter);
 	drawIsolines(painter);
+	drawScale(painter);
 }
 
 void MapWidget::paintEvent(QPaintEvent* ev)
 {
 	drawScene();
-	__super::paintEvent(ev);
+	super::paintEvent(ev);
 }
 
 void MapWidget::wheelEvent(QWheelEvent* ev)
@@ -540,14 +698,14 @@ void MapWidget::wheelEvent(QWheelEvent* ev)
 	double y = numDegrees.y();
 	y /= abs(y);
 	y *= mDeltaScale;
-	if (mScale - y <= 0)
-		return __super::wheelEvent(ev);
+	if (mScaleVal - y <= 0)
+		return super::wheelEvent(ev);
 
-	mScale -= y;
+	mScaleVal -= y;
 
 	ev->accept();
 
 	update();
 
-	__super::wheelEvent(ev);
+	super::wheelEvent(ev);
 }

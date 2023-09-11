@@ -5,7 +5,7 @@ struct Point;
 struct MAPPING2D SphericalVar
 {
 	SphericalVar();
-	SphericalVar(double _c, double _c0, double _a);
+	SphericalVar(double c, double c0, double a);
 	double operator()(const Point& u, const Point& v);
 
 	double c; //!< c + c0 = sill

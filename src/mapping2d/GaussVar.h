@@ -5,11 +5,11 @@ struct Point;
 struct MAPPING2D GaussVar
 {
 	GaussVar();
-	GaussVar(double _c, double _c0, double _a);
+	GaussVar(double c, double c0, double a);
 	double operator()(const Point& u, const Point& v);
 
 	double c; //!< c + c0 = sill
 	double c0; //!< nugget
-	double a; //!< correlation radius
+	//! a - correlation radius
 	double a2; //!< a^2
 };

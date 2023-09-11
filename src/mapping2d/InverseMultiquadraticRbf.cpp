@@ -2,15 +2,12 @@
 #include "InverseMultiquadraticRbf.h"
 #include "Structs.h"
 
-InverseMultiquadraticRbf::InverseMultiquadraticRbf()
+InverseMultiquadraticRbf::InverseMultiquadraticRbf() : a2(1.0)
 {
-	a = 1.0;
-	a2 = 1.0;
 }
 
-InverseMultiquadraticRbf::InverseMultiquadraticRbf(double _a) : a(_a)
+InverseMultiquadraticRbf::InverseMultiquadraticRbf(double a) : a2(a * a)
 {
-	a2 = a * a;
 }
 
 InverseMultiquadraticRbf::~InverseMultiquadraticRbf()

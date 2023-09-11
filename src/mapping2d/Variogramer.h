@@ -18,13 +18,12 @@ public:
 	void initMatrix()
 	{
 		Impl* impl = static_cast<Impl*>(this);
-		mA = InterpolAccessor::calcMatrix(impl);
-		mInvA.resize(mA.size1(), mA.size1(), 0.0);
-		MatrixCalculator::invertMatrix(mA, mInvA);
+		UblDblMatrix A = InterpolAccessor::calcMatrix(impl);
+		mInvA.resize(A.size1(), A.size1(), 0.0);
+		MatrixCalculator::invertMatrix(A, mInvA);
 	}
 
 protected:
 	two_points_func mGamma;
-	UblDblMatrix mA;
 	UblDblMatrix mInvA;
 };

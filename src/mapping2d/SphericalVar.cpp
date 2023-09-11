@@ -11,10 +11,8 @@ SphericalVar::SphericalVar()
 	a3 = a2 * a;
 }
 
-SphericalVar::SphericalVar(double _c, double _c0, double _a) : c(_c), c0(_c0), a(_a)
+SphericalVar::SphericalVar(double c, double c0, double a) : c(c), c0(c0), a(a), a2(a* a), a3(a2* a)
 {
-	a2 = a * a;
-	a3 = a2 * a;
 }
 
 double SphericalVar::operator()(const Point& u, const Point& v)

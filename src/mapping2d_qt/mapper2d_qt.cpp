@@ -21,7 +21,7 @@ public:
 mapper2d_qt::mapper2d_qt(QWidget* parent) : QWidget(parent)
 {
 	m_mapWidget = new MapWidget(this);
-	m_mapWidget->setMinimumSize(800, 800);
+	m_mapWidget->setMinimumSize(900, 900);
 
 	m_filesDir = QDir(QDir::currentPath(), tr("*.txt"));
 

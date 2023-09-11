@@ -6,13 +6,12 @@ GaussVar::GaussVar()
 {
 	c = 1.0;
 	c0 = 0.0;
-	a = 2.0;
+	double a = 2.0;
 	a2 = a * a;
 }
 
-GaussVar::GaussVar(double _c, double _c0, double _a) : c(_c), c0(_c0), a(_a)
+GaussVar::GaussVar(double c, double c0, double a) : c(c), c0(c0), a2(a* a)
 {
-	a2 = a * a;
 }
 
 double GaussVar::operator()(const Point& u, const Point& v)

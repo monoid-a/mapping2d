@@ -2,15 +2,12 @@
 #include "MultiquadraticRbf.h"
 #include "Structs.h"
 
-MultiquadraticRbf::MultiquadraticRbf()
+MultiquadraticRbf::MultiquadraticRbf() : a2(1.0)
 {
-	a = 1.0;
-	a2 = 1.0;
 }
 
-MultiquadraticRbf::MultiquadraticRbf(double _a) : a(_a)
+MultiquadraticRbf::MultiquadraticRbf(double a) : a2(a * a)
 {
-	a2 = a * a;
 }
 
 MultiquadraticRbf::~MultiquadraticRbf()

@@ -2,15 +2,12 @@
 #include "GaussianRbf.h"
 #include "Structs.h"
 
-GaussianRbf::GaussianRbf()
+GaussianRbf::GaussianRbf() : a2(1.0)
 {
-	a = 1.0;
-	a2 = 1.0;
 }
 
-GaussianRbf::GaussianRbf(double _a) : a(_a)
+GaussianRbf::GaussianRbf(double a) : a2(a * a)
 {
-	a2 = a * a;
 }
 
 GaussianRbf::~GaussianRbf()

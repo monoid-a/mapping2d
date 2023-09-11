@@ -6,19 +6,15 @@ CubicVar::CubicVar()
 {
 	c = 1.0;
 	c0 = 0.0;
-	a = 2.0;
+	double a = 2.0;
 	a2 = a * a;
 	a3 = a2 * a;
 	a5 = a3 * a2;
 	a7 = a5 * a2;
 }
 
-CubicVar::CubicVar(double _c, double _c0, double _a) : c(_c), c0(_c0), a(_a)
+CubicVar::CubicVar(double c, double c0, double a) : c(c), c0(c0), a2(a * a), a3(a2 * a), a5(a3 * a2), a7(a5 * a2)
 {
-	a2 = a * a;
-	a3 = a2 * a;
-	a5 = a3 * a2;
-	a7 = a5 * a2;
 }
 
 double CubicVar::operator()(const Point& u, const Point& v)

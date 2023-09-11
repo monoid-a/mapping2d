@@ -2,15 +2,12 @@
 #include "InverseQuadraticRbf.h"
 #include "Structs.h"
 
-InverseQuadraticRbf::InverseQuadraticRbf()
+InverseQuadraticRbf::InverseQuadraticRbf() : a2(1.0)
 {
-	a = 1.0;
-	a2 = 1.0;
 }
 
-InverseQuadraticRbf::InverseQuadraticRbf(double _a) : a(_a)
+InverseQuadraticRbf::InverseQuadraticRbf(double a) : a2(a* a)
 {
-	a2 = a * a;
 }
 
 InverseQuadraticRbf::~InverseQuadraticRbf()

@@ -9,7 +9,7 @@ ExponentVar::ExponentVar()
 	a = 2.0;
 }
 
-ExponentVar::ExponentVar(double _c, double _c0, double _a) : c(_c), c0(_c0), a(_a)
+ExponentVar::ExponentVar(double c, double c0, double a) : c(c), c0(c0), a(a)
 {
 }
 
