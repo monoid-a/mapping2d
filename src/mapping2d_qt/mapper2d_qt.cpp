@@ -52,13 +52,13 @@ mapper2d_qt::mapper2d_qt(QWidget* parent) : QWidget(parent)
 	};
 
 	QHBoxLayout* centralLayout = new QHBoxLayout;
-	centralLayout->addWidget(m_mapWidget);
 	auto ctrlLayout = new QGridLayout;
 	fillCtrlLayout(ctrlLayout);
 	centralLayout->addLayout(ctrlLayout);
+	centralLayout->addWidget(m_mapWidget);
 	setLayout(centralLayout);
-	centralLayout->setStretch(0, 1);
 	centralLayout->setStretch(1, 0);
+	centralLayout->setStretch(0, 1);
 }
 
 void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
