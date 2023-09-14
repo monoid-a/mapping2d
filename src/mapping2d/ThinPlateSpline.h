@@ -10,8 +10,8 @@ class MAPPING2D ThinPlateSpline : public LinearEstimator<ThinPlateSpline>, publi
 	friend class InterpolAccessor;
 
 public:
-	ThinPlateSpline(const PointsData& data);
-	ThinPlateSpline(PointsData&& data);
+	ThinPlateSpline(const PointsData& data, double smoothParam);
+	ThinPlateSpline(PointsData&& data, double smoothParam);
 	~ThinPlateSpline();
 
 protected:

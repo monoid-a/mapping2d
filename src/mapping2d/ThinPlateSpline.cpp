@@ -5,14 +5,13 @@
 #include "MatrixCalculator.h"
 #include "VectorCalculator.h"
 
-ThinPlateSpline::ThinPlateSpline(const PointsData& data) : LinearEstimator(data), Variogramer(two_points_func(ThinPlateSplineRbf{}))
+ThinPlateSpline::ThinPlateSpline(const PointsData& data, double smoothParam) : LinearEstimator(data), Variogramer(two_points_func(ThinPlateSplineRbf{ smoothParam }))
 {
 	calcWeights();
 }
 
-ThinPlateSpline::ThinPlateSpline(PointsData&& data) : LinearEstimator(std::move(data)), Variogramer(two_points_func(ThinPlateSplineRbf{}))
+ThinPlateSpline::ThinPlateSpline(PointsData&& data, double smoothParam) : LinearEstimator(std::move(data)), Variogramer(two_points_func(ThinPlateSplineRbf{ smoothParam }))
 {
-
 }
 
 ThinPlateSpline::~ThinPlateSpline()

@@ -32,4 +32,5 @@ struct MethodSettings
 	double mean; // mean value
 	double exponent; // IDW exponent
 	double gamma; // RBF parameter
+	double smoothParam; // spline smoothing parameter
 };

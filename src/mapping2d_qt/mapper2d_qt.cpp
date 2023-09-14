@@ -20,12 +20,12 @@ public:
 
 mapper2d_qt::mapper2d_qt(QWidget* parent) : QWidget(parent)
 {
-	m_mapWidget = new MapWidget(this);
-	m_mapWidget->setMinimumSize(900, 900);
+	mMapWidget = new MapWidget(this);
+	mMapWidget->setMinimumSize(900, 900);
 
-	m_filesDir = QDir(QDir::currentPath(), tr("*.txt"));
+	mFilesDir = QDir(QDir::currentPath(), tr("*.txt"));
 
-	m_methods =
+	mMethods =
 	{
 		{ Method::SimpleKriging , "Simple kriging" },
 		{ Method::OrdinaryKriging , "Ordinary kriging" },
@@ -35,7 +35,7 @@ mapper2d_qt::mapper2d_qt(QWidget* parent) : QWidget(parent)
 		{ Method::ThinPlateSpline , "Thin plate spline" },
 	};
 
-	m_variograms =
+	mVariograms =
 	{
 		{ Function::Cubic , "Cubic" },
 		{ Function::Exponent , "Exponent" },
@@ -43,7 +43,7 @@ mapper2d_qt::mapper2d_qt(QWidget* parent) : QWidget(parent)
 		{ Function::Spherical , "Spherical" },
 	};
 
-	m_rbfs =
+	mRbfs =
 	{
 		{ Function::RbfGauss , "Gauss" },
 		{ Function::RbfMultiquadratic , "Multiquadratic" },
@@ -55,7 +55,7 @@ mapper2d_qt::mapper2d_qt(QWidget* parent) : QWidget(parent)
 	auto ctrlLayout = new QGridLayout;
 	fillCtrlLayout(ctrlLayout);
 	centralLayout->addLayout(ctrlLayout);
-	centralLayout->addWidget(m_mapWidget);
+	centralLayout->addWidget(mMapWidget);
 	setLayout(centralLayout);
 	centralLayout->setStretch(1, 0);
 	centralLayout->setStretch(0, 1);
@@ -72,104 +72,111 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 	connect(filesBtn, &QPushButton::clicked, this, &mapper2d_qt::onFilesBtnClicked);
 	ctrlLayout->addWidget(filesBtn, column++, 0, 1, columnSpan);
 
-	m_fileList = new QListWidget(this);
-	connect(m_fileList, &QListWidget::itemDoubleClicked, this, &mapper2d_qt::setFile);
-	m_fileList->setFixedHeight(100);
-	ctrlLayout->addWidget(m_fileList, column++, 0, 1, columnSpan);
+	mFileList = new QListWidget(this);
+	connect(mFileList, &QListWidget::itemDoubleClicked, this, &mapper2d_qt::setFile);
+	mFileList->setFixedHeight(100);
+	ctrlLayout->addWidget(mFileList, column++, 0, 1, columnSpan);
 
-	m_methodsCmb = new QComboBox(this);
-	for (const auto& p : m_methods)
-		m_methodsCmb->addItem(p.second, QVariant((int)p.first));
-	m_methodsCmb->setCurrentIndex(1);
-	ctrlLayout->addWidget(m_methodsCmb, column++, 0, 1, columnSpan);
-	connect(m_methodsCmb, &QComboBox::currentTextChanged, this, &mapper2d_qt::selectMethod);
+	mMethodsCmb = new QComboBox(this);
+	for (const auto& p : mMethods)
+		mMethodsCmb->addItem(p.second, QVariant((int)p.first));
+	mMethodsCmb->setCurrentIndex(1);
+	ctrlLayout->addWidget(mMethodsCmb, column++, 0, 1, columnSpan);
+	connect(mMethodsCmb, &QComboBox::currentTextChanged, this, &mapper2d_qt::selectMethod);
 
-	m_variogramCmb = new QComboBox(this);
-	ctrlLayout->addWidget(m_variogramCmb, column++, 0, 1, columnSpan);
-	connect(m_variogramCmb, &QComboBox::currentTextChanged, this, &mapper2d_qt::createMap);
+	mVariogramCmb = new QComboBox(this);
+	ctrlLayout->addWidget(mVariogramCmb, column++, 0, 1, columnSpan);
+	connect(mVariogramCmb, &QComboBox::currentTextChanged, this, &mapper2d_qt::createMap);
 	
-	m_param0Label = new QLabel(this);
-	m_param0Label->setText("a:");
-	ctrlLayout->addWidget(m_param0Label, column, 0);
-	m_paramater0Edit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_paramater0Edit, column, 1);
+	mSmoothParamLabel = new QLabel(this);
+	mSmoothParamLabel->setText("Smooth. param.:");
+	ctrlLayout->addWidget(mSmoothParamLabel, column, 0);
+	mSmoothParamEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mSmoothParamEdit, column++, 1);
 
-	m_param1Label = new QLabel(this);
-	m_param1Label->setText("c:");
-	ctrlLayout->addWidget(m_param1Label, column, 2);
-	m_paramater1Edit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_paramater1Edit, column++, 3);
+	mParam0Label = new QLabel(this);
+	mParam0Label->setText("a:");
+	ctrlLayout->addWidget(mParam0Label, column, 0);
+	mParamater0Edit = new QLineEdit(this);
+	ctrlLayout->addWidget(mParamater0Edit, column, 1);
 
-	m_param2Label = new QLabel(this);
-	m_param2Label->setText("c0:");
-	ctrlLayout->addWidget(m_param2Label, column, 0);
-	m_paramater2Edit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_paramater2Edit, column, 1);
+	mParam1Label = new QLabel(this);
+	mParam1Label->setText("c:");
+	ctrlLayout->addWidget(mParam1Label, column, 2);
+	mParamater1Edit = new QLineEdit(this);
+	ctrlLayout->addWidget(mParamater1Edit, column++, 3);
 
-	m_meanLabel = new QLabel(this);
-	m_meanLabel->setText("mean:");
-	ctrlLayout->addWidget(m_meanLabel, column, 2);
-	m_meanEdit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_meanEdit, column++, 3);
+	mParam2Label = new QLabel(this);
+	mParam2Label->setText("c0:");
+	ctrlLayout->addWidget(mParam2Label, column, 0);
+	mParamater2Edit = new QLineEdit(this);
+	ctrlLayout->addWidget(mParamater2Edit, column, 1);
 
-	m_paramater0Edit->setText(QString::number(500.0));
-	m_paramater1Edit->setText(QString::number(1.0));
-	m_paramater2Edit->setText(QString::number(0.0));
-	m_meanEdit->setText(QString::number(0.0));
+	mMeanLabel = new QLabel(this);
+	mMeanLabel->setText("mean:");
+	ctrlLayout->addWidget(mMeanLabel, column, 2);
+	mMeanEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mMeanEdit, column++, 3);
 
-	for (auto edit : { m_paramater0Edit , m_paramater1Edit , m_paramater2Edit , m_meanEdit })
+	mSmoothParamEdit->setText(QString::number(0.0));
+	mParamater0Edit->setText(QString::number(500.0));
+	mParamater1Edit->setText(QString::number(1.0));
+	mParamater2Edit->setText(QString::number(0.0));
+	mMeanEdit->setText(QString::number(0.0));
+
+	for (auto edit : { mParamater0Edit , mParamater1Edit , mParamater2Edit , mMeanEdit , mSmoothParamEdit })
 	{
 		auto dv = new QDoubleValidator(edit);
 		edit->setValidator(dv);
 		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::createMap);
 	}
 
-	m_nxLbl = new QLabel(this);
-	m_nxLbl->setText("Nx:");
-	ctrlLayout->addWidget(m_nxLbl, column, 0);
-	m_nxEdit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_nxEdit, column, 1);
+	mNxLbl = new QLabel(this);
+	mNxLbl->setText("Nx:");
+	ctrlLayout->addWidget(mNxLbl, column, 0);
+	mNxEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mNxEdit, column, 1);
 
-	m_nyLbl = new QLabel(this);
-	m_nyLbl->setText("Ny:");
-	ctrlLayout->addWidget(m_nyLbl, column, 2);
-	m_nyEdit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_nyEdit, column++, 3);
+	mNyLbl = new QLabel(this);
+	mNyLbl->setText("Ny:");
+	ctrlLayout->addWidget(mNyLbl, column, 2);
+	mNyEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mNyEdit, column++, 3);
 
-	m_nxEdit->setText(QString::number(50));
-	m_nyEdit->setText(QString::number(50));
+	mNxEdit->setText(QString::number(50));
+	mNyEdit->setText(QString::number(50));
 
-	for (auto edit : { m_nxEdit , m_nyEdit })
+	for (auto edit : { mNxEdit , mNyEdit })
 	{
 		auto dv = new QIntValidator(edit);
 		edit->setValidator(dv);
 		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::createMap);
 	}
 
-	m_drawPoints = new QCheckBox(this);
-	m_drawPoints->setText("Draw points");
-	m_drawPoints->setChecked(true);
-	connect(m_drawPoints, &QCheckBox::clicked, this, &mapper2d_qt::drawPointsChecked);
-	ctrlLayout->addWidget(m_drawPoints, column++, 0, 1, columnSpan);
+	mDrawPoints = new QCheckBox(this);
+	mDrawPoints->setText("Draw points");
+	mDrawPoints->setChecked(true);
+	connect(mDrawPoints, &QCheckBox::clicked, this, &mapper2d_qt::drawPointsChecked);
+	ctrlLayout->addWidget(mDrawPoints, column++, 0, 1, columnSpan);
 
-	m_drawGrid = new QCheckBox(this);
-	m_drawGrid->setText("Draw grid");
-	m_drawGrid->setChecked(true);
-	connect(m_drawGrid, &QCheckBox::clicked, this, &mapper2d_qt::drawGridChecked);
-	ctrlLayout->addWidget(m_drawGrid, column++, 0, 1, columnSpan);
+	mDrawGrid = new QCheckBox(this);
+	mDrawGrid->setText("Draw grid");
+	mDrawGrid->setChecked(true);
+	connect(mDrawGrid, &QCheckBox::clicked, this, &mapper2d_qt::drawGridChecked);
+	ctrlLayout->addWidget(mDrawGrid, column++, 0, 1, columnSpan);
 
-	m_discreteFill = new QCheckBox(this);
-	m_discreteFill->setText("Discrete fill");
-	m_discreteFill->setChecked(true);
-	connect(m_discreteFill, &QCheckBox::clicked, this, &mapper2d_qt::discreteFillChecked);
-	ctrlLayout->addWidget(m_discreteFill, column++, 0, 1, columnSpan);
+	mDiscreteFill = new QCheckBox(this);
+	mDiscreteFill->setText("Discrete fill");
+	mDiscreteFill->setChecked(true);
+	connect(mDiscreteFill, &QCheckBox::clicked, this, &mapper2d_qt::discreteFillChecked);
+	ctrlLayout->addWidget(mDiscreteFill, column++, 0, 1, columnSpan);
 
-	m_continuousFill = new QCheckBox(this);
-	m_continuousFill->setText("Continuous fill");
-	m_continuousFill->setChecked(false);
-	connect(m_continuousFill, &QCheckBox::clicked, this, &mapper2d_qt::continuousFillChecked);
-	ctrlLayout->addWidget(m_continuousFill, column++, 0, 1, columnSpan);
-	m_continuousFill->setDisabled(true);
+	mContinuousFill = new QCheckBox(this);
+	mContinuousFill->setText("Continuous fill");
+	mContinuousFill->setChecked(false);
+	connect(mContinuousFill, &QCheckBox::clicked, this, &mapper2d_qt::continuousFillChecked);
+	ctrlLayout->addWidget(mContinuousFill, column++, 0, 1, columnSpan);
+	mContinuousFill->setDisabled(true);
 
 	QPushButton* saveSurfBtn = new QPushButton(this);
 	saveSurfBtn->setText("Save surface");
@@ -184,24 +191,24 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 	auto isoMinValLbl = new QLabel(this);
 	isoMinValLbl->setText("Isoline min value:");
 	ctrlLayout->addWidget(isoMinValLbl, column, 0, 1, 2);
-	m_isoMinValEdit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_isoMinValEdit, column++, 2, 1, 2);
+	mIsoMinValEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mIsoMinValEdit, column++, 2, 1, 2);
 
 	auto isoMaxValLbl = new QLabel(this);
 	isoMaxValLbl->setText("Isoline max value:");
 	ctrlLayout->addWidget(isoMaxValLbl, column, 0, 1, 2);
-	m_isoMaxValEdit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_isoMaxValEdit, column++, 2, 1, 2);
+	mIsoMaxValEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mIsoMaxValEdit, column++, 2, 1, 2);
 
 	auto isoCountLbl = new QLabel(this);
 	isoCountLbl->setText("Isoline count:");
 	ctrlLayout->addWidget(isoCountLbl, column, 0, 1, 2);
-	m_isoCntValEdit = new QLineEdit(this);
-	ctrlLayout->addWidget(m_isoCntValEdit, column++, 2, 1, 2);
+	mIsoCntValEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mIsoCntValEdit, column++, 2, 1, 2);
 
-	for (auto edit : { m_isoMinValEdit , m_isoMaxValEdit , m_isoCntValEdit })
+	for (auto edit : { mIsoMinValEdit , mIsoMaxValEdit , mIsoCntValEdit })
 	{
-		if (edit != m_isoCntValEdit)
+		if (edit != mIsoCntValEdit)
 		{
 			auto dv = new QDoubleValidator(edit);
 			edit->setValidator(dv);
@@ -215,15 +222,15 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::calculateAndUpdateIsolines);
 	}
 
-	m_isoCntValEdit->setText("10");
+	mIsoCntValEdit->setText("10");
 
 	QPushButton* calculateIsolinesBtn = new QPushButton(this);
 	calculateIsolinesBtn->setText("Calculate isolines");
 	connect(calculateIsolinesBtn, &QPushButton::clicked, this, &mapper2d_qt::calculateAndUpdateIsolines);
 	ctrlLayout->addWidget(calculateIsolinesBtn, column, 0, 1, columnSpan);
 
-	connect(m_mapWidget, &MapWidget::onSurfCalculated, this, &mapper2d_qt::onSurfCalculated);
-	connect(m_mapWidget, &MapWidget::onSurfLoaded, this, &mapper2d_qt::onSurfCalculated);
+	connect(mMapWidget, &MapWidget::onSurfCalculated, this, &mapper2d_qt::onSurfCalculated);
+	connect(mMapWidget, &MapWidget::onSurfLoaded, this, &mapper2d_qt::onSurfCalculated);
 
 	processCtrlsOnMethodSelect();
 }
@@ -241,50 +248,52 @@ void mapper2d_qt::selectMethod()
 
 void mapper2d_qt::processCtrlsOnMethodSelect()
 {
-	QVariant var = m_methodsCmb->itemData(m_methodsCmb->currentIndex());
+	QVariant var = mMethodsCmb->itemData(mMethodsCmb->currentIndex());
 	auto method = static_cast<Method>(var.toInt());
 
-	m_variogramCmb->clear();
-	m_variogramCmb->setEnabled(true);
+	mVariogramCmb->clear();
+	mVariogramCmb->setEnabled(true);
 
-	m_paramater0Edit->setEnabled(false);
-	m_paramater1Edit->setEnabled(false);
-	m_paramater2Edit->setEnabled(false);
-	m_meanEdit->setEnabled(false);
+	mSmoothParamEdit->setEnabled(false);
+	mParamater0Edit->setEnabled(false);
+	mParamater1Edit->setEnabled(false);
+	mParamater2Edit->setEnabled(false);
+	mMeanEdit->setEnabled(false);
 
 	if (method == Method::OrdinaryKriging || method == Method::SimpleKriging || method == Method::UniversalKriging)
 	{
-		for (const auto& p : m_variograms)
-			m_variogramCmb->addItem(p.second, QVariant((int)p.first));
-		m_variogramCmb->setCurrentIndex(3);
+		for (const auto& p : mVariograms)
+			mVariogramCmb->addItem(p.second, QVariant((int)p.first));
+		mVariogramCmb->setCurrentIndex(3);
 
-		m_paramater0Edit->setEnabled(true);
-		m_paramater1Edit->setEnabled(true);
-		m_paramater2Edit->setEnabled(true);
+		mParamater0Edit->setEnabled(true);
+		mParamater1Edit->setEnabled(true);
+		mParamater2Edit->setEnabled(true);
 		if (method == Method::SimpleKriging)
-			m_meanEdit->setEnabled(true);
+			mMeanEdit->setEnabled(true);
 	}
 	else if (method == Method::RBF)
 	{
-		for (const auto& p : m_rbfs)
-			m_variogramCmb->addItem(p.second, QVariant((int)p.first));
-		m_variogramCmb->setCurrentIndex(0);
+		for (const auto& p : mRbfs)
+			mVariogramCmb->addItem(p.second, QVariant((int)p.first));
+		mVariogramCmb->setCurrentIndex(0);
 
-		m_paramater0Edit->setEnabled(true);
+		mParamater0Edit->setEnabled(true);
 	}
 	else if (method == Method::InverseDistanceWeighting)
 	{
-		m_variogramCmb->setEnabled(false);
-		m_paramater0Edit->setEnabled(true);
-		m_paramater0Edit->setText("2");
+		mVariogramCmb->setEnabled(false);
+		mParamater0Edit->setEnabled(true);
+		mParamater0Edit->setText("2");
 	}
 	else if (method == Method::ThinPlateSpline)
 	{
-		m_variogramCmb->setEnabled(false);
-		m_paramater0Edit->setEnabled(false);
-		m_paramater1Edit->setEnabled(false);
-		m_paramater2Edit->setEnabled(false);
-		m_meanEdit->setEnabled(false);
+		mSmoothParamEdit->setEnabled(true);
+		mVariogramCmb->setEnabled(false);
+		mParamater0Edit->setEnabled(false);
+		mParamater1Edit->setEnabled(false);
+		mParamater2Edit->setEnabled(false);
+		mMeanEdit->setEnabled(false);
 	}
 	else
 		assert(0);
@@ -292,82 +301,82 @@ void mapper2d_qt::processCtrlsOnMethodSelect()
 
 void mapper2d_qt::drawPointsChecked()
 {
-	m_mapWidget->setDrawPoints(m_drawPoints->isChecked());
+	mMapWidget->setDrawPoints(mDrawPoints->isChecked());
 }
 
 void mapper2d_qt::drawGridChecked()
 {
-	m_mapWidget->setDrawGrid(m_drawGrid->isChecked());
+	mMapWidget->setDrawGrid(mDrawGrid->isChecked());
 }
 
 void mapper2d_qt::discreteFillChecked()
 {
-	m_mapWidget->setDiscreteFill(m_discreteFill->isChecked());
+	mMapWidget->setDiscreteFill(mDiscreteFill->isChecked());
 }
 
 void mapper2d_qt::continuousFillChecked()
 {
-	m_mapWidget->setContinuousFill(m_continuousFill->isChecked());
+	mMapWidget->setContinuousFill(mContinuousFill->isChecked());
 }
 
 void mapper2d_qt::saveSurface()
 {
-	m_mapWidget->saveSurface();
+	mMapWidget->saveSurface();
 }
 
 void mapper2d_qt::loadSurface()
 {
-	m_mapWidget->loadSurface();
+	mMapWidget->loadSurface();
 }
 
 void mapper2d_qt::calculateAndUpdateIsolines()
 {
-	QString minz_str = m_isoMinValEdit->text();
+	QString minz_str = mIsoMinValEdit->text();
 	minz_str.replace(",", ".");
 	double minz = minz_str.toDouble();
 
-	QString maxz_str = m_isoMaxValEdit->text();
+	QString maxz_str = mIsoMaxValEdit->text();
 	maxz_str.replace(",", ".");
 	double maxz = maxz_str.toDouble();
 
-	QString isocnt_str = m_isoCntValEdit->text();
+	QString isocnt_str = mIsoCntValEdit->text();
 	int cntlvl = isocnt_str.toInt();
 
 	MWaitCursor wait;
-	m_mapWidget->calculateAndUpdateIsolines(minz, maxz, cntlvl);
+	mMapWidget->calculateAndUpdateIsolines(minz, maxz, cntlvl);
 }
 
 void mapper2d_qt::onSurfCalculated(std::pair<double, double> minmax)
 {
 	double minz = std::floor(minmax.first);
 	double maxz = std::round(minmax.second);
-	m_isoMinValEdit->setText(QString::number(minz));
-	m_isoMaxValEdit->setText(QString::number(maxz));
+	mIsoMinValEdit->setText(QString::number(minz));
+	mIsoMaxValEdit->setText(QString::number(maxz));
 	calculateAndUpdateIsolines();
 }
 
 void mapper2d_qt::onFilesBtnClicked()
 {
-	QString path = QFileDialog::getExistingDirectory(0, tr("Choose Directory"), m_filesDir.absolutePath());
+	QString path = QFileDialog::getExistingDirectory(0, tr("Choose Directory"), mFilesDir.absolutePath());
 
 	if (path.isEmpty())
 		return;
 
-	m_filesDir.setPath(path);
+	mFilesDir.setPath(path);
 
 	updateFileCombo();
 }
 
 void mapper2d_qt::setFile()
 {
-	auto file_name = m_fileList->currentItem()->text();
-	QString file_path = m_filesDir.filePath(file_name);
+	auto file_name = mFileList->currentItem()->text();
+	QString file_path = mFilesDir.filePath(file_name);
 	std::string path = file_path.toLocal8Bit().constData();
 	std::ifstream in(path, std::ios_base::in);
 
-	m_points.x.clear();
-	m_points.y.clear();
-	m_points.z.clear();
+	mPoints.x.clear();
+	mPoints.y.clear();
+	mPoints.z.clear();
 
 	while (true)
 	{
@@ -379,9 +388,9 @@ void mapper2d_qt::setFile()
 		double z;
 		if (in >> x >> y >> z)
 		{
-			m_points.x.push_back(x);
-			m_points.y.push_back(y);
-			m_points.z.push_back(z);
+			mPoints.x.push_back(x);
+			mPoints.y.push_back(y);
+			mPoints.z.push_back(z);
 		}
 		else
 			break;
@@ -392,48 +401,53 @@ void mapper2d_qt::setFile()
 
 void mapper2d_qt::updateFileCombo()
 {
-	QFileInfoList list = m_filesDir.entryInfoList();
+	QFileInfoList list = mFilesDir.entryInfoList();
 
-	if (m_filesDir.count() == 0)
+	if (mFilesDir.count() == 0)
 		return;
 
-	m_fileList->clear();
+	mFileList->clear();
 
 	for (auto& it : list)
-		m_fileList->addItem(it.fileName());
+		mFileList->addItem(it.fileName());
 }
 
 void mapper2d_qt::createMap()
 {
 	MWaitCursor wait;
 
-	m_mapWidget->setDrawGrid(m_drawGrid->isChecked());
+	mMapWidget->setDrawGrid(mDrawGrid->isChecked());
 
-	QVariant var = m_methodsCmb->itemData(m_methodsCmb->currentIndex());
+	QVariant var = mMethodsCmb->itemData(mMethodsCmb->currentIndex());
 	int method = var.toInt();
 
-	QVariant func = m_variogramCmb->itemData(m_variogramCmb->currentIndex());
+	QVariant func = mVariogramCmb->itemData(mVariogramCmb->currentIndex());
 	int vario = func.toInt();
 
-	QString param0_str = m_paramater0Edit->text();
+	
+	QString smoothparam_str = mSmoothParamEdit->text();
+	smoothparam_str.replace(",", ".");
+	double smoothParam = smoothparam_str.toDouble();
+
+	QString param0_str = mParamater0Edit->text();
 	param0_str.replace(",", ".");
 	double param0 = param0_str.toDouble();
 
-	QString param1_str = m_paramater1Edit->text();
+	QString param1_str = mParamater1Edit->text();
 	param1_str.replace(",", ".");
 	double param1 = param1_str.toDouble();
 
-	QString param2_str = m_paramater2Edit->text();
+	QString param2_str = mParamater2Edit->text();
 	param2_str.replace(",", ".");
 	double param2 = param2_str.toDouble();
 
-	QString mean_str = m_meanEdit->text();
+	QString mean_str = mMeanEdit->text();
 	mean_str.replace(",", ".");
 	double mean = mean_str.toDouble();
 
-	QString nx_str = m_nxEdit->text();
+	QString nx_str = mNxEdit->text();
 	int nx = nx_str.toInt();
-	QString ny_str = m_nyEdit->text();
+	QString ny_str = mNyEdit->text();
 	int ny = ny_str.toInt();
 
 	MethodSettings settings;
@@ -445,6 +459,7 @@ void mapper2d_qt::createMap()
 	settings.mean = mean;
 	settings.gamma = param0;
 	settings.exponent = param0;
-	m_mapWidget->calculateSurface(&m_points, settings, nx, ny);
-	m_mapWidget->update();
+	settings.smoothParam = smoothParam;
+	mMapWidget->calculateSurface(&mPoints, settings, nx, ny);
+	mMapWidget->update();
 }
