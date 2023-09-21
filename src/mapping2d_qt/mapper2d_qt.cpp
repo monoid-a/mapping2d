@@ -183,11 +183,11 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 	mAngleEdit = new QLineEdit(this);
 	ctrlLayout->addWidget(mAngleEdit, column++, 1);
 
-	for (auto edit : { mOriginXEdit , mOriginYEdit , mAngleEdit , mStepXEdit , mStepYEdit })
+	for (auto edit : { mAngleEdit , mStepXEdit , mStepYEdit , mOriginXEdit , mOriginYEdit })
 	{
 		auto dv = new QDoubleValidator(edit);
 		edit->setValidator(dv);
-		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::createMap);
+		connect(edit, &QLineEdit::returnPressed, this, [this]() { createMap(); });
 	}
 
 	mDrawPoints = new QCheckBox(this);

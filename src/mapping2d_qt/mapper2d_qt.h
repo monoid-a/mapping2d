@@ -23,6 +23,7 @@ public:
 
 protected slots:
 	void onSurfCalculated(std::pair<double, double> minmax);
+	void createMap();
 
 protected:
 	void fillCtrlLayout(QGridLayout* ctrlLayout);
@@ -34,7 +35,6 @@ protected:
 
 	void calcMesh();
 	void calcMeshByPoints();
-	void createMap();
 	void selectMethod();
 	void selectFunction();
 	void processCtrlsOnMethodSelect();
