@@ -7,6 +7,7 @@ class MAPPING2D RegularMesh2d
 public:
 	static RegularMesh2d calculate(const PointsData& points, size_t nx, size_t ny);
 	static RegularMesh2d calculate(const PointsData& points, double dx, double dy);
+	static RegularMesh2d calculate(size_t nx, size_t ny, double stepx, double stepy, double origx, double origy, double angle);
 
 public:
 	RegularMesh2d();
@@ -27,8 +28,9 @@ public:
 	double getYMax() const;
 	double getDx() const;
 	double getDy() const;
-	std::vector<Point> getCorners() const;
-	bool pointOnBorder(Point point, double eps = 1e-5) const;
+	double getAngle() const;
+	void rotate(double x, double y, double& tx, double& ty);
+	void rotateInv(double x, double y, double& tx, double& ty);
 
 private:
 	Point mOrigin;

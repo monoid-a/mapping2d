@@ -13,6 +13,8 @@ public:
 	Point get(size_t index) const;
 	size_t getSize() const;
 
+	std::vector<Point>& getPoints();
+
 private:
 	std::vector<Point> mPoints;
 };

@@ -214,13 +214,23 @@ void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, size_t
 	if (ps->x.empty() || ps->y.empty() || ps->z.empty())
 		return;
 
-	mPoints = ps;
-
 	mMesh = RegularMesh2d::calculate(*ps, nx, ny);
 
+	calculateSurface(ps, settings, mMesh);
+}
+
+void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, const RegularMesh2d& mesh)
+{
+	mPoints = ps;
+	mMesh = mesh;
+	calculateSurface(ps, settings);
+}
+
+void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings)
+{
 	initView();
 
-	mSurface = Mapper::calculateSurface(mPoints, settings, nx, ny);
+	mSurface = Mapper::calculateSurface(mPoints, settings, mMesh);
 
 	mZMin = mSurface->getZMin();
 	mZMax = mSurface->getZMax();
@@ -312,7 +322,7 @@ void MapWidget::setContinuousFill(bool b)
 	update();
 }
 
-// write file in Surfer ASCII format
+// write file in Irap classic ASCII format
 void MapWidget::saveSurface()
 {
 	if (!mSurface)
@@ -328,27 +338,32 @@ void MapWidget::saveSurface()
 	if (file.open(QFile::WriteOnly | QFile::Truncate))
 	{
 		QTextStream out(&file);
-		out << "DSAA\n";
 		
-		const RegularMesh2d& mesh = mSurface->getMesh();
+		const RegularMesh2d& mesh = const_cast<const Surface*>(mSurface.get())->getMesh();
 
 		size_t nx = mesh.getNx();
 		size_t ny = mesh.getNy();
 
-		out << nx << " " << ny << "\n";
+		double dx = mesh.getDx();
+		double dy = mesh.getDy();
 
 		double xmin = mesh.getXMin();
 		double xmax = mesh.getXMax();
-		out << xmin << " " << xmax << "\n";
 
 		double ymin = mesh.getYMin();
 		double ymax = mesh.getYMax();
-		out << ymin << " " << ymax << "\n";
 
 		double zmin = mSurface->getZMin();
 		double zmax = mSurface->getZMax();
-		out << zmin << " " << zmax << "\n";
 
+		double angle = mesh.getAngle();
+
+		out << "-996" << " " << ny << " " << dy << " " << dx << "\n";
+		out << xmin << " " << xmax << " " << ymin << " " << ymax << "\n";
+		out << nx << " " << angle << " " << xmin << " " << ymin << "\n";
+
+		out << "0 0 0 0 0 0 0" << "\n";
+		
 		for (size_t i = 0; i < nx; ++i)
 		{
 			for (size_t j = 0; j < ny; ++j)
@@ -363,6 +378,7 @@ void MapWidget::saveSurface()
 	}
 }
 
+// read file from Irap classic ASCII format
 void MapWidget::loadSurface()
 {
 	QString path = QFileDialog::getOpenFileName(this, "Load surface");
@@ -374,7 +390,7 @@ void MapWidget::loadSurface()
 
 		QString str;
 		in >> str;
-		if (str.toLower() != "dsaa")
+		if (str.toLower() != "-996")
 		{
 			QMessageBox box(QMessageBox::Icon::Critical, "Load surface", "Wrong format", QMessageBox::StandardButton::Ok);
 			box.exec();
@@ -383,24 +399,25 @@ void MapWidget::loadSurface()
 
 		size_t nx;
 		size_t ny;
-		in >> nx >> ny;
-
 		double xmin;
 		double xmax;
-		in >> xmin >> xmax;
-
 		double ymin;
 		double ymax;
-		in >> ymin >> ymax;
+		double dx;
+		double dy;
+		double angle;
 
-		in >> mZMin >> mZMax;
+		in >> ny >> dy >>  dx;
+		in >> xmin >> xmax >> ymin >> ymax;
+		in >> nx >> angle >> xmin >> ymin;
 
-		double dx = (xmax - xmin) / (nx - 1);
-		double dy = (ymax - ymin) / (ny - 1);
+		{
+			double _;
+			for (size_t i = 0; i < 7; ++i)
+				in >> _ ;
+		}
 
-		mMesh = RegularMesh2d(Point{ xmin , ymin }, dx, dy, nx, ny, 0.0);
-
-		initView();
+		mMesh = RegularMesh2d(Point{ xmin , ymin }, dx, dy, nx, ny, angle);
 
 		mSurface = std::make_unique<Surface>(mMesh);
 
@@ -416,6 +433,8 @@ void MapWidget::loadSurface()
 
 		mZMin = mSurface->getZMin();
 		mZMax = mSurface->getZMax();
+
+		initView();
 
 		emit onSurfLoaded(std::make_pair(mZMin, mZMax));
 
@@ -535,20 +554,29 @@ void MapWidget::drawSurface(QPainter& painter)
 	double dx = mMesh.getDx();
 	double dy = mMesh.getDy();
 
+	double angle = mMesh.getAngle();
+
 	for (size_t i = 0; i < nx; i++)
 	{
 		for (size_t j = 0; j < ny; j++)
 		{
 			Point p0 = mMesh.getXY(i, j);
-			Point p1;
-			p1.x = p0.x + dx;
-			p1.y = p0.y + dy;
+			Point p1 = mMesh.getXY(i + 1, j + 1);
 
-			double x0 = transform_x(p0.x);
-			double y0 = transform_y(p0.y);
+			double tx0;
+			double ty0;
 
-			double x1 = transform_x(p1.x);
-			double y1 = transform_y(p1.y);
+			double tx1;
+			double ty1;
+
+			mMesh.rotateInv(p0.x, p0.y, tx0, ty0);
+			mMesh.rotateInv(p1.x, p1.y, tx1, ty1);
+
+			double x0 = transform_x(tx0);
+			double y0 = transform_y(ty0);
+
+			double x1 = transform_x(tx1);
+			double y1 = transform_y(ty1);
 
 			double dx = x1 - x0;
 			double dy = y1 - y0;
@@ -566,10 +594,10 @@ void MapWidget::drawSurface(QPainter& painter)
 			if (j == ny - 1)
 				y1 -= 0.5 * (qreal)dy;
 
-			QPointF pf0(x0, y0);
-			QPointF pf1(x1, y1);
+			QPointF pr0(x0, y0);
+			QPointF pr1(x1, y1);
 
-			QRectF rect(pf0, pf1);
+			QRectF rect(pr0, pr1);
 
 			double z = mSurface->getZ(i, j);
 			double hue = (240.0 / 360.0) * (mZMax - z) / (mZMax - mZMin);
@@ -577,7 +605,29 @@ void MapWidget::drawSurface(QPainter& painter)
 			QColor colour = QColor::fromHsvF(qreal(hue), qreal(s), qreal(1.0));
 
 			QBrush brush(colour, brushStyle);
+
+			QPointF blr;
+
+			{
+				double inv_x0 = inv_transform_x(x0);
+				double inv_y0 = inv_transform_y(y0);
+				double rotx0;
+				double roty0;
+				mMesh.rotate(inv_x0, inv_y0, rotx0, roty0);
+
+				double map_rotx0 = transform_x(rotx0);
+				double map_roty0 = transform_y(roty0);
+
+				blr.setX(map_rotx0);
+				blr.setY(map_roty0);
+			}
+
+			rect.translate(-pr0);
+			painter.translate(blr);
+			painter.rotate(-angle);
 			painter.fillRect(rect, brush);
+			painter.rotate(angle);
+			painter.translate(-blr);
 		}
 	}
 }

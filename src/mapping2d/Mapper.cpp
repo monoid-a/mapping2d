@@ -159,9 +159,10 @@ void calculateSurface(Surface* surface, const Interpolator& interpolator, const 
 #endif
 }
 
-std::unique_ptr<Surface> Mapper::calculateSurface(PointsData* ps, MethodSettings settings, size_t nx, size_t ny)
+std::unique_ptr<Surface> Mapper::calculateSurface(PointsData* ps, MethodSettings settings, const RegularMesh2d& mesh)
 {
-	RegularMesh2d mesh = RegularMesh2d::calculate(*ps, nx, ny);
+	size_t nx = mesh.getNx();
+	size_t ny = mesh.getNy();
 
 	two_points_func tpf = getFunc(settings);
 

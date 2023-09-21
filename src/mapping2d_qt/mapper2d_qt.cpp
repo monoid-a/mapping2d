@@ -153,6 +153,43 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::createMap);
 	}
 
+	QLabel* stepXLbl = new QLabel(this);
+	stepXLbl->setText("Step X:");
+	ctrlLayout->addWidget(stepXLbl, column, 0);
+	mStepXEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mStepXEdit, column, 1);
+
+	QLabel* stepYLbl = new QLabel(this);
+	stepYLbl->setText("Step Y:");
+	ctrlLayout->addWidget(stepYLbl, column, 2);
+	mStepYEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mStepYEdit, column++, 3);
+
+	QLabel* origXLbl = new QLabel(this);
+	origXLbl->setText("Origin X:");
+	ctrlLayout->addWidget(origXLbl, column, 0);
+	mOriginXEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mOriginXEdit, column, 1);
+
+	QLabel* origYLbl = new QLabel(this);
+	origYLbl->setText("Origin Y:");
+	ctrlLayout->addWidget(origYLbl, column, 2);
+	mOriginYEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mOriginYEdit, column++, 3);
+
+	QLabel* angleLbl = new QLabel(this);
+	angleLbl->setText("Angle:");
+	ctrlLayout->addWidget(angleLbl, column, 0);
+	mAngleEdit = new QLineEdit(this);
+	ctrlLayout->addWidget(mAngleEdit, column++, 1);
+
+	for (auto edit : { mOriginXEdit , mOriginYEdit , mAngleEdit , mStepXEdit , mStepYEdit })
+	{
+		auto dv = new QDoubleValidator(edit);
+		edit->setValidator(dv);
+		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::createMap);
+	}
+
 	mDrawPoints = new QCheckBox(this);
 	mDrawPoints->setText("Draw points");
 	mDrawPoints->setChecked(true);
@@ -201,7 +238,7 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 	ctrlLayout->addWidget(mIsoMaxValEdit, column++, 2, 1, 2);
 
 	auto isoCountLbl = new QLabel(this);
-	isoCountLbl->setText("Isoline count:");
+	isoCountLbl->setText("Isoline level count:");
 	ctrlLayout->addWidget(isoCountLbl, column, 0, 1, 2);
 	mIsoCntValEdit = new QLineEdit(this);
 	ctrlLayout->addWidget(mIsoCntValEdit, column++, 2, 1, 2);
@@ -396,6 +433,7 @@ void mapper2d_qt::setFile()
 			break;
 	}
 
+	calcMeshByPoints();
 	createMap();
 }
 
@@ -412,8 +450,56 @@ void mapper2d_qt::updateFileCombo()
 		mFileList->addItem(it.fileName());
 }
 
+void mapper2d_qt::calcMeshByPoints()
+{
+	QString nx_str = mNxEdit->text();
+	size_t nx = nx_str.toInt();
+	QString ny_str = mNyEdit->text();
+	size_t ny = ny_str.toInt();
+
+	mMesh = RegularMesh2d::calculate(mPoints, nx, ny);
+
+	double dx = mMesh.getDx();
+	double dy = mMesh.getDy();
+	Point origin = mMesh.getOrigin();
+
+	mStepXEdit->setText(QString::number(dx));
+	mStepYEdit->setText(QString::number(dy));
+	mOriginXEdit->setText(QString::number(origin.x));
+	mOriginYEdit->setText(QString::number(origin.y));
+	mAngleEdit->setText(QString::number(0.0));
+}
+
+void mapper2d_qt::calcMesh()
+{
+	QString nx_str = mNxEdit->text();
+	size_t nx = nx_str.toInt();
+	QString ny_str = mNyEdit->text();
+	size_t ny = ny_str.toInt();
+
+	QString stepx_str = mStepXEdit->text();
+	double stepx = stepx_str.toDouble();
+
+	QString stepy_str = mStepYEdit->text();
+	double stepy = stepy_str.toDouble();
+
+	QString origx_str = mOriginXEdit->text();
+	double origx = origx_str.toDouble();
+
+	QString origy_str = mOriginYEdit->text();
+	double origy = origy_str.toDouble();
+
+	QString angle_str = mAngleEdit->text();
+	double angle = angle_str.toDouble();
+
+	mMesh = RegularMesh2d::calculate(nx, ny, stepx, stepy, origx, origy, angle);
+}
+
 void mapper2d_qt::createMap()
 {
+	if (mPoints.x.empty() || mPoints.y.empty() || mPoints.z.empty())
+		return;
+
 	MWaitCursor wait;
 
 	mMapWidget->setDrawGrid(mDrawGrid->isChecked());
@@ -424,7 +510,6 @@ void mapper2d_qt::createMap()
 	QVariant func = mVariogramCmb->itemData(mVariogramCmb->currentIndex());
 	int vario = func.toInt();
 
-	
 	QString smoothparam_str = mSmoothParamEdit->text();
 	smoothparam_str.replace(",", ".");
 	double smoothParam = smoothparam_str.toDouble();
@@ -445,10 +530,7 @@ void mapper2d_qt::createMap()
 	mean_str.replace(",", ".");
 	double mean = mean_str.toDouble();
 
-	QString nx_str = mNxEdit->text();
-	int nx = nx_str.toInt();
-	QString ny_str = mNyEdit->text();
-	int ny = ny_str.toInt();
+	calcMesh();
 
 	MethodSettings settings;
 	settings.methodType = static_cast<Method>(method);
@@ -460,6 +542,6 @@ void mapper2d_qt::createMap()
 	settings.gamma = param0;
 	settings.exponent = param0;
 	settings.smoothParam = smoothParam;
-	mMapWidget->calculateSurface(&mPoints, settings, nx, ny);
+	mMapWidget->calculateSurface(&mPoints, settings, mMesh);
 	mMapWidget->update();
 }

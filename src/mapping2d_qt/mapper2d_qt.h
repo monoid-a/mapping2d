@@ -4,8 +4,8 @@
 #include <QDir>
 #include "../mapping2d/MethodSettings.h"
 #include "../mapping2d/Structs.h"
+#include "../mapping2d/RegularMesh2d.h"
 
-class RegularMesh2d;
 class MapWidget;
 class QGridLayout;
 class QListWidget;
@@ -32,6 +32,8 @@ protected:
 
 	void setFile();
 
+	void calcMesh();
+	void calcMeshByPoints();
 	void createMap();
 	void selectMethod();
 	void selectFunction();
@@ -47,6 +49,7 @@ protected:
 private:
 	MapWidget* mMapWidget;
 	PointsData mPoints;
+	RegularMesh2d mMesh;
 	QDir mFilesDir;
 	QListWidget* mFileList;
 	QComboBox* mMethodsCmb;
@@ -65,6 +68,11 @@ private:
 	QLineEdit* mNxEdit;
 	QLabel* mNyLbl;
 	QLineEdit* mNyEdit;
+	QLineEdit* mStepXEdit;
+	QLineEdit* mStepYEdit;
+	QLineEdit* mOriginXEdit;
+	QLineEdit* mOriginYEdit;
+	QLineEdit* mAngleEdit;
 	QCheckBox* mDrawPoints;
 	QCheckBox* mDrawGrid;
 	QCheckBox* mDiscreteFill;

@@ -28,3 +28,8 @@ size_t Isoline::getSize() const
 {
 	return mPoints.size();
 }
+
+std::vector<Point>& Isoline::getPoints()
+{
+	return mPoints;
+}

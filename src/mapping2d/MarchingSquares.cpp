@@ -337,6 +337,11 @@ std::vector<Node> nextNodes(size_t i, size_t j, CellTraceVariant variant, bool t
 	return {};
 }
 
+Point getSidePoint(const Point& p0, const Point& p1, double w)
+{
+	return { p0.x + (p1.x - p0.x) * w, p0.y + (p1.y - p0.y) * w };
+}
+
 std::vector<std::pair<Segment, std::vector<Node>>> calcSegments(const Surface* surface, size_t i, size_t j, double isovalue)
 {
 	CellTraceVariant variant = cellTraceVariant(surface, i, j, isovalue);
@@ -355,10 +360,10 @@ std::vector<std::pair<Segment, std::vector<Node>>> calcSegments(const Surface* s
 	Point top_left = cell_xys.top_left;
 	Point top_right = cell_xys.top_right;
 
-	double x_bottom = bottom_left.x + (bottom_right.x - bottom_left.x) * (isovalue - v_bl) / (v_br - v_bl);
-	double x_top = top_left.x + (top_right.x - top_left.x) * (isovalue - v_tl) / (v_tr - v_tl);
-	double y_left = bottom_left.y + (top_left.y - bottom_left.y) * (isovalue - v_bl) / (v_tl - v_bl);
-	double y_right = bottom_right.y + (top_right.y - bottom_right.y) * (isovalue - v_br) / (v_tr - v_br);
+	Point p_bottom = getSidePoint(bottom_left, bottom_right, (isovalue - v_bl) / (v_br - v_bl));
+	Point p_top = getSidePoint(top_left, top_right, (isovalue - v_tl) / (v_tr - v_tl));
+	Point p_left = getSidePoint(bottom_left, top_left, (isovalue - v_bl) / (v_tl - v_bl));
+	Point p_right = getSidePoint(bottom_right, top_right, (isovalue - v_br) / (v_tr - v_br));
 
 	auto nodes = nextNodes(i, j, variant);
 
@@ -367,49 +372,49 @@ std::vector<std::pair<Segment, std::vector<Node>>> calcSegments(const Surface* s
 	case CellTraceVariant::LeftBottom:
 	case CellTraceVariant::LeftBottomExclude:
 	{
-		Segment seg{ Point{ bottom_left.x , y_left } , Point{ x_bottom , bottom_left.y } };
+		Segment seg{ p_left , p_bottom };
 		return { { seg , nodes } };
 	}
 	case CellTraceVariant::RightBottom:
 	case CellTraceVariant::RightBottomExclude:
 	{
-		Segment seg{ Point{ x_bottom ,  bottom_left.y } , Point{ bottom_right.x , y_right } };
+		Segment seg{ p_bottom , p_right };
 		return { { seg , nodes } };
 	}
 	case CellTraceVariant::LeftTop:
 	case CellTraceVariant::LeftTopExclude:
 	{
-		Segment seg{ Point{ bottom_left.x , y_left } , Point{ x_top , top_left.y } };
+		Segment seg{ p_left , p_top };
 		return { { seg , nodes } };
 	}
 	case CellTraceVariant::RightTop:
 	case CellTraceVariant::RightTopExclude:
 	{
-		Segment seg{ Point{ x_top , top_left.y } , Point{ bottom_right.x , y_right } };
+		Segment seg{ p_top , p_right };
 		return { { seg , nodes } };
 	}
 	case CellTraceVariant::Bottom2:
 	case CellTraceVariant::Top2:
 	{
-		Segment seg{ Point{ bottom_left.x , y_left } , Point{ bottom_right.x , y_right } };
+		Segment seg{ p_left , p_right };
 		return { { seg , nodes } };
 	}
 	case CellTraceVariant::Left2:
 	case CellTraceVariant::Right2:
 	{
-		Segment seg{ Point{ x_top , top_left.y } , Point{ x_bottom , bottom_left.y } };
+		Segment seg{ p_top , p_bottom };
 		return { { seg , nodes } };
 	}
 	case CellTraceVariant::SaddleFirst:
 	{
-		Segment seg0{ Point{ bottom_left.x , y_left } , Point{ x_bottom , bottom_left.y } };
-		Segment seg1{ Point{ x_top , top_left.y } , Point{ bottom_right.x , y_right } };
+		Segment seg0{ p_left , p_bottom };
+		Segment seg1{ p_top , p_right };
 		return { { seg0, nextNodes(i, j, variant, false) }, {seg1, nextNodes(i, j, variant, true) } };
 	}
 	case CellTraceVariant::SaddleSecond:
 	{
-		Segment seg0{ Point{ bottom_left.x , y_left } , Point{ x_top , top_left.y } };
-		Segment seg1{ Point{ x_bottom ,  bottom_left.y } , Point{ bottom_right.x , y_right } };
+		Segment seg0{ p_left , p_top };
+		Segment seg1{ p_bottom , p_right };
 		return { { seg0, nextNodes(i, j, variant, true) }, {seg1, nextNodes(i, j, variant, false) } };
 	}
 	}
@@ -424,7 +429,7 @@ std::vector<Isoline> MarchingSquares::getIsolines(double isovalue)
 
 	std::unordered_map<size_t, int> visited_cells;
 
-	IsolineBuilder iso_builder{ mSurface->getMesh() };
+	IsolineBuilder iso_builder{ const_cast<const Surface*>(mSurface)->getMesh() };
 	for (size_t i = 0; i < nx - 1; ++i)
 	{
 		for (size_t j = 0; j < ny - 1; ++j)

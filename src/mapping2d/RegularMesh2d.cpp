@@ -1,10 +1,6 @@
 #include "pch.h"
 #include "RegularMesh2d.h"
 #include "Structs.h"
-
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #include "Isoliner.h"
 
 RegularMesh2d RegularMesh2d::calculate(const PointsData& points, size_t nx, size_t ny)
@@ -54,6 +50,12 @@ RegularMesh2d RegularMesh2d::calculate(const PointsData& points, double dx, doub
 
 	RegularMesh2d mesh(origin, dx, dy, nx, ny, 0.0);
 
+	return mesh;
+}
+
+RegularMesh2d RegularMesh2d::calculate(size_t nx, size_t ny, double stepx, double stepy, double origx, double origy, double angle)
+{
+	RegularMesh2d mesh({ origx, origy }, stepx, stepy, nx, ny, angle);
 	return mesh;
 }
 
@@ -156,22 +158,26 @@ Point RegularMesh2d::getOrigin() const
 
 double RegularMesh2d::getXMin() const
 {
-	return getXY(0, 0).x;
+	return std::min({ getXY(0, 0).x, getXY(0, getNy() - 1).x,
+	getXY(getNx() - 1, 0).x, getXY(getNx() - 1, getNy() - 1).x });
 }
 
 double RegularMesh2d::getYMin() const
 {
-	return getXY(0, 0).y;
+	return std::min({ getXY(0, 0).y, getXY(0, getNy() - 1).y,
+		getXY(getNx() - 1, 0).y, getXY(getNx() - 1, getNy() - 1).y });
 }
 
 double RegularMesh2d::getXMax() const
 {
-	return getXY(getNx() - 1, getNy() - 1).x;
+	return std::max({ getXY(0, 0).x, getXY(0, getNy() - 1).x, 
+		getXY(getNx() - 1, 0).x, getXY(getNx() - 1, getNy() - 1).x });
 }
 
 double RegularMesh2d::getYMax() const
 {
-	return getXY(getNx() - 1, getNy() - 1).y;
+	return std::max({ getXY(0, 0).y, getXY(0, getNy() - 1).y,
+		getXY(getNx() - 1, 0).y, getXY(getNx() - 1, getNy() - 1).y });
 }
 
 double RegularMesh2d::getDx() const
@@ -184,27 +190,25 @@ double RegularMesh2d::getDy() const
 	return mDy;
 }
 
-std::vector<Point> RegularMesh2d::getCorners() const
+double RegularMesh2d::getAngle() const
 {
-	std::vector<Point> corners;
-	double xmax = getXMax();
-	double xmin = getXMin();
-	double ymax = getYMax();
-	double ymin = getYMin();
-	corners.push_back({ xmin , ymin });
-	corners.push_back({ xmax , ymin });
-	corners.push_back({ xmax , ymax });
-	corners.push_back({ xmin , ymax });
-	return corners;
+	return mAlpha;
 }
 
-bool RegularMesh2d::pointOnBorder(Point point, double eps) const
+void RegularMesh2d::rotate(double x, double y, double& tx, double& ty)
 {
-	double xmax = getXMax();
-	double xmin = getXMin();
-	double ymax = getYMax();
-	double ymin = getYMin();
+	x = x - mOrigin.x;
+	y = y - mOrigin.y;
 
-	return std::abs(point.x - xmin) < 1e-5 || std::abs(point.x - xmax) < 1e-5 || 
-		std::abs(point.y - ymin) < 1e-5 || std::abs(point.y - ymax) < 1e-5;
+	tx = mOrigin.x + x * mCosAlpha - y * mSinAlpha;
+	ty = mOrigin.y + x * mSinAlpha + y * mCosAlpha;
+}
+
+void RegularMesh2d::rotateInv(double x, double y, double& tx, double& ty)
+{
+	double x_prime = x - mOrigin.x;
+	double y_prime = y - mOrigin.y;
+
+	tx = x_prime * mCosAlpha + y_prime * mSinAlpha + mOrigin.x;
+	ty = -x_prime * mSinAlpha + y_prime * mCosAlpha + mOrigin.y;
 }

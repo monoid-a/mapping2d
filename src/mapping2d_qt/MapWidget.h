@@ -24,6 +24,8 @@ public:
 	~MapWidget();
 
 	void calculateSurface(PointsData* ps, MethodSettings settings, size_t nx, size_t ny);
+	void calculateSurface(PointsData* ps, MethodSettings settings, const RegularMesh2d& mesh);
+	void calculateSurface(PointsData* ps, MethodSettings settings);
 	void setDrawPoints(bool b);
 	void setDrawGrid(bool b);
 	void setDiscreteFill(bool b);

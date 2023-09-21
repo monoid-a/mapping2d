@@ -17,6 +17,9 @@
 #include <future>
 #include <set>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #define BOOST_UBLAS_NDEBUG
 
 #include <boost/numeric/ublas/vector.hpp>
