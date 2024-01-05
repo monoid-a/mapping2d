@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_QT_PCH_H_
+#define MAPPING2D_MAPPING2D_QT_PCH_H_
 
 #define _SECURE_SCL 0
 #define _HAS_ITERATOR_DEBUGGING 0
@@ -26,3 +27,5 @@
 #else
 	#define MAPPING2D
 #endif
+
+#endif // MAPPING2D_MAPPING2D_QT_PCH_H_

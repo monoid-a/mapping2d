@@ -5,56 +5,56 @@
 #include "Variograms.h"
 #include "Interpolators.h"
 
-two_points_func Mapper::getFunc(MethodSettings settings)
+TwoPointsFunc Mapper::getFunc(MethodSettings settings)
 {
 	switch (settings.funcType)
 	{
 	case Function::Spherical:
 	{
 		SphericalVar var(settings.c, settings.c0, settings.a);
-		return two_points_func(var);
+		return TwoPointsFunc(var);
 	}
 	case Function::Cubic:
 	{
 		CubicVar var(settings.c, settings.c0, settings.a);
-		return two_points_func(var);
+		return TwoPointsFunc(var);
 	}
 	case Function::Exponent:
 	{
 		ExponentVar var(settings.c, settings.c0, settings.a);
-		return two_points_func(var);
+		return TwoPointsFunc(var);
 	}
 	case Function::Gauss:
 	{
 		GaussVar var(settings.c, settings.c0, settings.a);
-		return two_points_func(var);
+		return TwoPointsFunc(var);
 	}
 	case Function::RbfGauss:
 	{
 		GaussianRbf rbf(settings.a);
-		return two_points_func(rbf);
+		return TwoPointsFunc(rbf);
 	}
 	case Function::RbfInvMultiquadratic:
 	{
 		InverseMultiquadraticRbf rbf(settings.a);
-		return two_points_func(rbf);
+		return TwoPointsFunc(rbf);
 	}
 	case Function::RbfInvQuadratic:
 	{
 		InverseQuadraticRbf rbf(settings.a);
-		return two_points_func(rbf);
+		return TwoPointsFunc(rbf);
 	}
 	case Function::RbfMultiquadratic:
 	{
 		MultiquadraticRbf rbf(settings.a);
-		return two_points_func(rbf);
+		return TwoPointsFunc(rbf);
 	}
 	default:
 		assert(0);
 		break;
 	}
 
-	return two_points_func(
+	return TwoPointsFunc(
 		[](const Point& p0, const Point& p1)
 		{
 			return 0.0;
@@ -164,7 +164,7 @@ std::unique_ptr<Surface> Mapper::calculateSurface(PointsData* ps, MethodSettings
 	size_t nx = mesh.getNx();
 	size_t ny = mesh.getNy();
 
-	two_points_func tpf = getFunc(settings);
+	TwoPointsFunc tpf = getFunc(settings);
 
 	auto surface = std::make_unique<Surface>(mesh);
 

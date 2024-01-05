@@ -4,11 +4,11 @@
 #include "MatrixCalculator.h"
 #include "VectorCalculator.h"
 
-SimpleKriging::SimpleKriging(const PointsData& data, const two_points_func& cov, double mean) : LinearEstimator(data), Variogramer(cov), m_mean(mean)
+SimpleKriging::SimpleKriging(const PointsData& data, const TwoPointsFunc& cov, double mean) : LinearEstimator(data), Variogramer(cov), mMean(mean)
 {
 }
 
-SimpleKriging::SimpleKriging(PointsData&& data, const two_points_func& cov, double mean) : LinearEstimator(std::move(data)), Variogramer(cov), m_mean(mean)
+SimpleKriging::SimpleKriging(PointsData&& data, const TwoPointsFunc& cov, double mean) : LinearEstimator(std::move(data)), Variogramer(cov), mMean(mean)
 {
 }
 
@@ -16,34 +16,28 @@ SimpleKriging::~SimpleKriging()
 {
 }
 
-UblDblVec SimpleKriging::calcVec(double x, double y, const PointsData& data, const two_points_func& gamma) const
+UblDblVec SimpleKriging::calcVec(double x, double y, const PointsData& data, const TwoPointsFunc& gamma) const
 {
 	return VectorCalculator::calculate(x, y, data, data.x.size(), gamma, nullptr);
-}
-
-UblDblVec SimpleKriging::calcWeights(const UblDblMatrix& A_inv, const UblDblVec& b)
-{
-	auto w = prod(A_inv, b);
-	return w;
 }
 
 std::vector<double> SimpleKriging::getWeights(double x, double y) const
 {
 	UblDblVec b = calcVec(x, y, mPointsData, mGamma);
-	UblDblVec w = calcWeights(mInvA, b);
+	UblDblVec w = prod(mInvA, b);
 	return { w.begin() , w.end() };
 }
 
-std::vector<double> SimpleKriging::getVals(double x, double y) const
+std::vector<double> SimpleKriging::getSampleValues(double x, double y) const
 {
 	std::vector<double> res;
 	res.reserve(mPointsData.z.size());
 	for (auto z : mPointsData.z)
-		res.push_back(z - m_mean);
+		res.push_back(z - mMean);
 	return res;
 }
 
-UblDblMatrix SimpleKriging::calcMatrix()
+UblDblMatrix SimpleKriging::calcMatrix() const
 {
 	const auto& xs = mPointsData.x;
 	const auto& ys = mPointsData.y;
@@ -54,5 +48,5 @@ UblDblMatrix SimpleKriging::calcMatrix()
 
 double SimpleKriging::correctZ(double z) const
 {
-	return z + m_mean;
+	return z + mMean;
 }

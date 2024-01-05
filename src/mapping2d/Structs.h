@@ -1,20 +1,20 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_STRUCTS_H_
+#define MAPPING2D_MAPPING2D_STRUCTS_H_
 
 #include <functional>
 #include <vector>
-#include <deque>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 
 struct Point;
-using two_points_func = std::function<double(const Point& u, const Point& v)>;
+using TwoPointsFunc = std::function<double(const Point& u, const Point& v)>;
 
 namespace ubl = boost::numeric::ublas;
 using UblDblMatrix = ubl::matrix<double, ubl::row_major, std::vector<double>>;
 using UblDblVec = ubl::vector<double, std::vector<double>>;
 
-using modif_matrix = std::function<void(UblDblMatrix& matr)>;
-using modif_vector = std::function<void(UblDblVec& matr)>;
+using MatrixModifFunc = std::function<void(UblDblMatrix& matr)>;
+using VectorModifFunc = std::function<void(UblDblVec& matr)>;
 
 struct PointsData
 {
@@ -27,6 +27,7 @@ struct Point
 {
 	double x;
 	double y;
+
 	friend bool operator==(const Point& l, const Point& r)
 	{
 		return l.x == r.x && l.y == r.y;
@@ -95,3 +96,5 @@ struct Segment
 	Point bgn;
 	Point end;
 };
+
+#endif // MAPPING2D_MAPPING2D_STRUCTS_H_

@@ -5,12 +5,12 @@
 #include "MatrixCalculator.h"
 #include "VectorCalculator.h"
 
-ThinPlateSpline::ThinPlateSpline(const PointsData& data, double smoothParam) : LinearEstimator(data), Variogramer(two_points_func(ThinPlateSplineRbf{ smoothParam }))
+ThinPlateSpline::ThinPlateSpline(const PointsData& data, double smoothParam) : LinearEstimator(data), Variogramer(TwoPointsFunc(ThinPlateSplineRbf{ smoothParam }))
 {
 	calcWeights();
 }
 
-ThinPlateSpline::ThinPlateSpline(PointsData&& data, double smoothParam) : LinearEstimator(std::move(data)), Variogramer(two_points_func(ThinPlateSplineRbf{ smoothParam }))
+ThinPlateSpline::ThinPlateSpline(PointsData&& data, double smoothParam) : LinearEstimator(std::move(data)), Variogramer(TwoPointsFunc(ThinPlateSplineRbf{ smoothParam }))
 {
 }
 
@@ -19,7 +19,7 @@ ThinPlateSpline::~ThinPlateSpline()
 
 }
 
-UblDblMatrix ThinPlateSpline::calcMatrix()
+UblDblMatrix ThinPlateSpline::calcMatrix() const
 {
 	const auto& xs = mPointsData.x;
 	const auto& ys = mPointsData.y;
@@ -67,7 +67,7 @@ std::vector<double> ThinPlateSpline::getWeights(double x, double y) const
 	return mWeights;
 }
 
-std::vector<double> ThinPlateSpline::getVals(double x, double y) const
+std::vector<double> ThinPlateSpline::getSampleValues(double x, double y) const
 {
 	std::vector<double> vec(mPointsData.x.size() + 3, 0.0);
 

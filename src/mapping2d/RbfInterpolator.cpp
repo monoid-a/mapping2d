@@ -2,12 +2,12 @@
 #include "RbfInterpolator.h"
 #include "MatrixCalculator.h"
 
-RbfInterpolator::RbfInterpolator(const PointsData& data, const two_points_func& cov) : LinearEstimator(data), Variogramer(cov)
+RbfInterpolator::RbfInterpolator(const PointsData& data, const TwoPointsFunc& cov) : LinearEstimator(data), Variogramer(cov)
 {
 	calcWeights();
 }
 
-RbfInterpolator::RbfInterpolator(PointsData&& data, const two_points_func& cov) : LinearEstimator(std::move(data)), Variogramer(cov)
+RbfInterpolator::RbfInterpolator(PointsData&& data, const TwoPointsFunc& cov) : LinearEstimator(std::move(data)), Variogramer(cov)
 {
 
 }
@@ -17,7 +17,7 @@ RbfInterpolator::~RbfInterpolator()
 
 }
 
-UblDblMatrix RbfInterpolator::calcMatrix()
+UblDblMatrix RbfInterpolator::calcMatrix() const
 {
 	const auto& xs = mPointsData.x;
 	const auto& ys = mPointsData.y;
@@ -47,7 +47,7 @@ std::vector<double> RbfInterpolator::getWeights(double x, double y) const
 	return mWeights;
 }
 
-std::vector<double> RbfInterpolator::getVals(double x, double y) const
+std::vector<double> RbfInterpolator::getSampleValues(double x, double y) const
 {
 	std::vector<double> vec(mPointsData.x.size(), 0.0);
 

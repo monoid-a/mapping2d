@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_GAUSSVAR_H_
+#define MAPPING2D_MAPPING2D_GAUSSVAR_H_
 
 struct Point;
 
@@ -13,3 +14,5 @@ struct MAPPING2D GaussVar
 	//! a - correlation radius
 	double a2; //!< a^2
 };
+
+#endif // MAPPING2D_MAPPING2D_GAUSSVAR_H_

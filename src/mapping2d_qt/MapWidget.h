@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_QT_MAPWIDGET_H_
+#define MAPPING2D_MAPPING2D_QT_MAPWIDGET_H_
+
 
 #include <QWidget>
 
@@ -85,3 +87,5 @@ private:
 	std::pair<int, int> mPrevPos;
 	std::unique_ptr<Scale> mScale;
 };
+
+#endif // MAPPING2D_MAPPING2D_QT_MAPWIDGET_H_

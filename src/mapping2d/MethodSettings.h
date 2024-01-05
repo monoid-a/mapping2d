@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_METHODSETTINGS_H_
+#define MAPPING2D_MAPPING2D_METHODSETTINGS_H_
 
 enum class Method
 {
@@ -34,3 +35,5 @@ struct MethodSettings
 	double gamma; // RBF parameter
 	double smoothParam; // spline smoothing parameter
 };
+
+#endif // MAPPING2D_MAPPING2D_METHODSETTINGS_H_

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_ISOLINEACCESSOR_H_
+#define MAPPING2D_MAPPING2D_ISOLINEACCESSOR_H_
 
 #include "Isoline.h"
 
@@ -13,3 +14,5 @@ public:
 		return impl->getIsolines(isovalue);
 	}
 };
+
+#endif // MAPPING2D_MAPPING2D_ISOLINEACCESSOR_H_

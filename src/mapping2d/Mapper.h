@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_MAPPER_H_
+#define MAPPING2D_MAPPING2D_MAPPER_H_
 
 #include "Structs.h"
 #include "MethodSettings.h"
@@ -11,5 +12,7 @@ public:
 	~Mapper() = default;
 
 	static std::unique_ptr<Surface> calculateSurface(PointsData* ps, MethodSettings settings, const RegularMesh2d& mesh);
-	static two_points_func getFunc(MethodSettings settings);
+	static TwoPointsFunc getFunc(MethodSettings settings);
 };
+
+#endif // MAPPING2D_MAPPING2D_MAPPER_H_

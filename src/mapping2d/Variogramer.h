@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_VARIOGRAMER_H_
+#define MAPPING2D_MAPPING2D_VARIOGRAMER_H_
 
 #include "Structs.h"
 #include "InterpolAccessor.h"
@@ -8,7 +9,7 @@ template<typename Impl>
 class Variogramer
 {
 public:
-	explicit Variogramer(const two_points_func& cov) : mGamma(cov)
+	explicit Variogramer(const TwoPointsFunc& cov) : mGamma(cov)
 	{
 		initMatrix();
 	}
@@ -17,13 +18,15 @@ public:
 
 	void initMatrix()
 	{
-		Impl* impl = static_cast<Impl*>(this);
-		UblDblMatrix A = InterpolAccessor::calcMatrix(impl);
+		const Impl* impl = static_cast<const Impl*>(this);
+		UblDblMatrix A = InterpolAccessor<Impl>::calcMatrix(impl);
 		mInvA.resize(A.size1(), A.size1(), 0.0);
 		MatrixCalculator::invertMatrix(A, mInvA);
 	}
 
 protected:
-	two_points_func mGamma;
-	UblDblMatrix mInvA;
+	TwoPointsFunc mGamma; //!< RBF or Variogram
+	UblDblMatrix mInvA; //!< inverse of the correlation/rbf matrix
 };
+
+#endif // MAPPING2D_MAPPING2D_VARIOGRAMER_H_

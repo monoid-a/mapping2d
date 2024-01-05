@@ -4,11 +4,11 @@
 #include "MatrixCalculator.h"
 #include "VectorCalculator.h"
 
-UniversalKriging::UniversalKriging(const PointsData& data, const two_points_func& cov) : LinearEstimator(data), Variogramer(cov)
+UniversalKriging::UniversalKriging(const PointsData& data, const TwoPointsFunc& cov) : LinearEstimator(data), Variogramer(cov)
 {
 }
 
-UniversalKriging::UniversalKriging(PointsData&& data, const two_points_func& cov) : LinearEstimator(std::move(data)), Variogramer(cov)
+UniversalKriging::UniversalKriging(PointsData&& data, const TwoPointsFunc& cov) : LinearEstimator(std::move(data)), Variogramer(cov)
 {
 }
 
@@ -16,7 +16,7 @@ UniversalKriging::~UniversalKriging()
 {
 }
 
-UblDblVec UniversalKriging::calcVec(double x, double y, const PointsData& data, const two_points_func& gamma) const
+UblDblVec UniversalKriging::calcVec(double x, double y, const PointsData& data, const TwoPointsFunc& gamma) const
 {
 	return VectorCalculator::calculate(x, y, data, data.x.size() + 3, gamma,
 		[x, y](UblDblVec& vec)
@@ -27,20 +27,14 @@ UblDblVec UniversalKriging::calcVec(double x, double y, const PointsData& data, 
 		});
 }
 
-UblDblVec UniversalKriging::calcWeights(const UblDblMatrix& A_inv, const UblDblVec& b)
-{
-	auto w = prod(A_inv, b);
-	return w;
-}
-
 std::vector<double> UniversalKriging::getWeights(double x, double y) const
 {
 	UblDblVec b = calcVec(x, y, mPointsData, mGamma);
-	UblDblVec w = calcWeights(mInvA, b);
+	UblDblVec w = prod(mInvA, b);
 	return { w.begin() , w.end() };
 }
 
-std::vector<double> UniversalKriging::getVals(double x, double y) const
+std::vector<double> UniversalKriging::getSampleValues(double x, double y) const
 {
 	std::vector<double> res;
 	res.reserve(mPointsData.z.size());
@@ -49,7 +43,7 @@ std::vector<double> UniversalKriging::getVals(double x, double y) const
 	return res;
 }
 
-UblDblMatrix UniversalKriging::calcMatrix()
+UblDblMatrix UniversalKriging::calcMatrix() const
 {
 	const auto& xs = mPointsData.x;
 	const auto& ys = mPointsData.y;

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_QT_MAPPER2D_QT_H_
+#define MAPPING2D_MAPPING2D_QT_MAPPER2D_QT_H_
 
 #include <QtWidgets/QWidget>
 #include <QDir>
@@ -84,3 +85,5 @@ private:
 	std::vector<std::pair<Function, QString>> mVariograms;
 	std::vector<std::pair<Function, QString>> mRbfs;
 };
+
+#endif // MAPPING2D_MAPPING2D_QT_MAPPER2D_QT_H_

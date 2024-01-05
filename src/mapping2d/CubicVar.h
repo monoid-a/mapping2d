@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_CUBICVAR_H_
+#define MAPPING2D_MAPPING2D_CUBICVAR_H_
 
 struct Point;
 
@@ -16,3 +17,5 @@ struct MAPPING2D CubicVar
 	double a5; //!< a^5
 	double a7; //!< a^7
 };
+
+#endif // MAPPING2D_MAPPING2D_CUBICVAR_H_

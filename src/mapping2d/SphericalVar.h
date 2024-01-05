@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_SPHERICALVAR_H_
+#define MAPPING2D_MAPPING2D_SPHERICALVAR_H_
 
 struct Point;
 
@@ -14,3 +15,5 @@ struct MAPPING2D SphericalVar
 	double a2; //!< a^2
 	double a3; //!< a^3
 };
+
+#endif // MAPPING2D_MAPPING2D_SPHERICALVAR_H_

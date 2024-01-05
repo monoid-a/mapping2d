@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_REGULARMESH2D_H_
+#define MAPPING2D_MAPPING2D_REGULARMESH2D_H_
 
 #include "Structs.h"
 
@@ -42,3 +43,5 @@ private:
 	double mSinAlpha;
 	double mCosAlpha;
 };
+
+#endif // MAPPING2D_MAPPING2D_REGULARMESH2D_H_

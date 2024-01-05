@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_MARCHINGSQUARES_H_
+#define MAPPING2D_MAPPING2D_MARCHINGSQUARES_H_
 
 #include "Isoliner.h"
 
@@ -15,3 +16,5 @@ public:
 protected:
 	std::vector<Isoline> getIsolines(double isovalue);
 };
+
+#endif // MAPPING2D_MAPPING2D_MARCHINGSQUARES_H_

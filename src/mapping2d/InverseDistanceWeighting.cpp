@@ -56,7 +56,7 @@ std::vector<double> InverseDistanceWeighting::getWeights(double x, double y) con
 	return vec;
 }
 
-std::vector<double> InverseDistanceWeighting::getVals(double x, double y) const
+std::vector<double> InverseDistanceWeighting::getSampleValues(double x, double y) const
 {
 	std::vector<double> res;
 	for (auto v : mPointsData.z)

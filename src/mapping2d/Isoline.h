@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_ISOLINE_H_
+#define MAPPING2D_MAPPING2D_ISOLINE_H_
 
 #include "Structs.h"
 
@@ -18,3 +19,5 @@ public:
 private:
 	std::vector<Point> mPoints;
 };
+
+#endif // MAPPING2D_MAPPING2D_ISOLINE_H_

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_LINEARESTIMATOR_H_
+#define MAPPING2D_MAPPING2D_LINEARESTIMATOR_H_
 
 #include "Structs.h"
 
@@ -24,15 +25,12 @@ public:
 	{
 		const Impl* impl = static_cast<const Impl*>(this);
 
-		double z{ 0.0 };
+		const std::vector<double>& w = InterpolAccessor<Impl>::getWeights(impl, x, y);
+		const std::vector<double>& v = InterpolAccessor<Impl>::getSampleValues(impl, x, y);
 
-		const std::vector<double>& w = InterpolAccessor::getWeights(impl, x, y);
-		const std::vector<double>& v = InterpolAccessor::getVals(impl, x, y);
-
-		for (size_t i = 0; i < v.size(); ++i)
-			z += w[i] * v[i];
-
-		z = InterpolAccessor::correctZ(impl, z);
+		// z += w[i] * v[i];
+		double z = std::inner_product(v.begin(), v.end(), w.begin(), 0.0);
+		z = InterpolAccessor<Impl>::correctZ(impl, z);
 
 		return z;
 	}
@@ -40,3 +38,5 @@ public:
 protected:
 	PointsData mPointsData;
 };
+
+#endif // MAPPING2D_MAPPING2D_LINEARESTIMATOR_H_

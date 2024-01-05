@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_THINPLATESPLINERBF_H_
+#define MAPPING2D_MAPPING2D_THINPLATESPLINERBF_H_
 
 struct Point;
 
@@ -12,3 +13,5 @@ public:
 protected:
 	double mSmoothParam;
 };
+
+#endif // MAPPING2D_MAPPING2D_THINPLATESPLINERBF_H_

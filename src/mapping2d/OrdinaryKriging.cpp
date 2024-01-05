@@ -4,11 +4,11 @@
 #include "MatrixCalculator.h"
 #include "VectorCalculator.h"
 
-OrdinaryKriging::OrdinaryKriging(const PointsData& data, const two_points_func& cov) : LinearEstimator(data), Variogramer(cov)
+OrdinaryKriging::OrdinaryKriging(const PointsData& data, const TwoPointsFunc& cov) : LinearEstimator(data), Variogramer(cov)
 {
 }
 
-OrdinaryKriging::OrdinaryKriging(PointsData&& data, const two_points_func& cov) : LinearEstimator(std::move(data)), Variogramer(cov)
+OrdinaryKriging::OrdinaryKriging(PointsData&& data, const TwoPointsFunc& cov) : LinearEstimator(std::move(data)), Variogramer(cov)
 {
 }
 
@@ -16,7 +16,7 @@ OrdinaryKriging::~OrdinaryKriging()
 {
 }
 
-UblDblMatrix OrdinaryKriging::calcMatrix()
+UblDblMatrix OrdinaryKriging::calcMatrix() const
 {
 	const size_t nx = mPointsData.x.size() + 1;
 	const size_t ny = mPointsData.y.size() + 1;
@@ -37,7 +37,7 @@ UblDblMatrix OrdinaryKriging::calcMatrix()
 	return matr;
 }
 
-UblDblVec OrdinaryKriging::calcVec(double x, double y, const PointsData& data, const two_points_func& gamma) const
+UblDblVec OrdinaryKriging::calcVec(double x, double y, const PointsData& data, const TwoPointsFunc& gamma) const
 {
 	return VectorCalculator::calculate(x, y, data, data.x.size() + 1, gamma,
 		[](UblDblVec& vec)
@@ -46,20 +46,14 @@ UblDblVec OrdinaryKriging::calcVec(double x, double y, const PointsData& data, c
 		});
 }
 
-UblDblVec OrdinaryKriging::calcWeights(const UblDblMatrix& A_inv, const UblDblVec& b)
-{
-	auto w = prod(A_inv, b);
-	return w;
-}
-
 std::vector<double> OrdinaryKriging::getWeights(double x, double y) const
 {
 	UblDblVec b = calcVec(x, y, mPointsData, mGamma);
-	UblDblVec w = calcWeights(mInvA, b);
+	UblDblVec w = prod(mInvA, b);
 	return { w.begin() , w.end() };
 }
 
-std::vector<double> OrdinaryKriging::getVals(double x, double y) const
+std::vector<double> OrdinaryKriging::getSampleValues(double x, double y) const
 {
 	std::vector<double> res;
 	res.reserve(mPointsData.z.size());

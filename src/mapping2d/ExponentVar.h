@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_EXPONENTVAR_H_
+#define MAPPING2D_MAPPING2D_EXPONENTVAR_H_
 
 struct Point;
 
@@ -12,3 +13,5 @@ struct MAPPING2D ExponentVar
 	double c0; //!< nugget
 	double a; //!< correlation radius
 };
+
+#endif // MAPPING2D_MAPPING2D_EXPONENTVAR_H_

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_SURFACE_H_
+#define MAPPING2D_MAPPING2D_SURFACE_H_
+
 
 #include "RegularMesh2d.h"
 
@@ -25,3 +27,5 @@ protected:
 	double mZMin;
 	double mZMax;
 };
+
+#endif // MAPPING2D_MAPPING2D_SURFACE_H_

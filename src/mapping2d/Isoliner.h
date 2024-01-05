@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MAPPING2D_MAPPING2D_ISOLINER_H_
+#define MAPPING2D_MAPPING2D_ISOLINER_H_
+
 
 #include "Isoline.h"
 #include "Isovalues.h"
@@ -101,3 +103,5 @@ public:
 protected:
 	Surface* mSurface;
 };
+
+#endif // MAPPING2D_MAPPING2D_ISOLINER_H_
