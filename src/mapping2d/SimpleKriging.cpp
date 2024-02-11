@@ -25,7 +25,9 @@ std::vector<double> SimpleKriging::getWeights(double x, double y) const
 {
 	UblDblVec b = calcVec(x, y, mPointsData, mGamma);
 	UblDblVec w = prod(mInvA, b);
-	return { w.begin() , w.end() };
+	std::vector<double> res;
+	res.swap(w.data());
+	return res;
 }
 
 std::vector<double> SimpleKriging::getSampleValues(double x, double y) const

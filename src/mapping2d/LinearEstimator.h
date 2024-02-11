@@ -25,8 +25,8 @@ public:
 	{
 		const Impl* impl = static_cast<const Impl*>(this);
 
-		const std::vector<double>& w = InterpolAccessor<Impl>::getWeights(impl, x, y);
-		const std::vector<double>& v = InterpolAccessor<Impl>::getSampleValues(impl, x, y);
+		std::vector<double> w = InterpolAccessor<Impl>::getWeights(impl, x, y);
+		std::vector<double> v = InterpolAccessor<Impl>::getSampleValues(impl, x, y);
 
 		// z += w[i] * v[i];
 		double z = std::inner_product(v.begin(), v.end(), w.begin(), 0.0);

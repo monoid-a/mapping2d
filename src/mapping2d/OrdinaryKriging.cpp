@@ -50,16 +50,14 @@ std::vector<double> OrdinaryKriging::getWeights(double x, double y) const
 {
 	UblDblVec b = calcVec(x, y, mPointsData, mGamma);
 	UblDblVec w = prod(mInvA, b);
-	return { w.begin() , w.end() };
+	std::vector<double> res;
+	res.swap(w.data());
+	return res;
 }
 
 std::vector<double> OrdinaryKriging::getSampleValues(double x, double y) const
 {
-	std::vector<double> res;
-	res.reserve(mPointsData.z.size());
-	for (auto v : mPointsData.z)
-		res.push_back(v);
-	return res;
+	return mPointsData.z;
 }
 
 double OrdinaryKriging::correctZ(double z) const

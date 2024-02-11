@@ -248,8 +248,9 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 	if (event->button() == Qt::LeftButton)
 	{
 		QPoint point = event->pos();
-		double x = inv_transform_x(point.x());
-		double y = inv_transform_y(point.y());
+		Point itp = inv_transform_xy(point.x(), point.y());
+		double x = itp.x;
+		double y = itp.y;
 		Node node = mMesh.getIJ(x, y);
 
 		double z = mSurface->getZ(node.i, node.j);
@@ -279,11 +280,13 @@ void MapWidget::mouseMoveEvent(QMouseEvent* event)
 			return;
 		}
 
-		double x = inv_transform_x(point.x());
-		double y = inv_transform_y(point.y());
+		Point itp = inv_transform_xy(point.x(), point.y());
+		double x = itp.x;
+		double y = itp.y;
 
-		double prev_x = inv_transform_x(mPrevPos.first);
-		double prev_y = inv_transform_y(mPrevPos.second);
+		Point prev_itp = inv_transform_xy(mPrevPos.first, mPrevPos.second);
+		double prev_x = prev_itp.x;
+		double prev_y = prev_itp.y;
 
 		double dx = prev_x - x;
 		double dy = prev_y - y;
@@ -483,6 +486,16 @@ double MapWidget::transform_y(double y)
 	return (-y + mCenter.second) * mScaleVal + mTranslate.second;
 }
 
+Point MapWidget::transform_xy(double x, double y)
+{
+	return { (x - mCenter.first) * mScaleVal + mTranslate.first , (-y + mCenter.second) * mScaleVal + mTranslate.second };
+}
+
+Point MapWidget::inv_transform_xy(double x, double y)
+{
+	return { mCenter.first + (x - mTranslate.first) / mScaleVal , mCenter.second - (y - mTranslate.second) / mScaleVal };
+}
+
 void MapWidget::drawGrid(QPainter& painter)
 {
 	if (!mDrawGrid)
@@ -505,11 +518,13 @@ void MapWidget::drawGrid(QPainter& painter)
 		Point p0 = mMesh.getXY(i, 0);
 		Point p1 = mMesh.getXY(i, ny - 1);
 
-		int x0 = transform_x(p0.x);
-		int y0 = transform_y(p0.y);
+		Point tp0 = transform_xy(p0.x, p0.y);
+		int x0 = tp0.x;
+		int y0 = tp0.y;
 
-		int x1 = transform_x(p1.x);
-		int y1 = transform_y(p1.y);
+		Point tp1 = transform_xy(p1.x, p1.y);
+		int x1 = tp1.x;
+		int y1 = tp1.y;
 
 		painter.drawLine(x0, y0, x1, y1);
 	}
@@ -519,11 +534,13 @@ void MapWidget::drawGrid(QPainter& painter)
 		Point p0 = mMesh.getXY(0, j);
 		Point p1 = mMesh.getXY(nx - 1, j);
 
-		int x0 = transform_x(p0.x);
-		int y0 = transform_y(p0.y);
+		Point tp0 = transform_xy(p0.x, p0.y);
+		int x0 = tp0.x;
+		int y0 = tp0.y;
 
-		int x1 = transform_x(p1.x);
-		int y1 = transform_y(p1.y);
+		Point tp1 = transform_xy(p1.x, p1.y);
+		int x1 = tp1.x;
+		int y1 = tp1.y;
 
 		painter.drawLine(x0, y0, x1, y1);
 	}
@@ -572,11 +589,13 @@ void MapWidget::drawSurface(QPainter& painter)
 			mMesh.rotateInv(p0.x, p0.y, tx0, ty0);
 			mMesh.rotateInv(p1.x, p1.y, tx1, ty1);
 
-			double x0 = transform_x(tx0);
-			double y0 = transform_y(ty0);
+			Point tp0 = transform_xy(tx0, ty0);
+			double x0 = tp0.x;
+			double y0 = tp0.y;
 
-			double x1 = transform_x(tx1);
-			double y1 = transform_y(ty1);
+			Point tp1 = transform_xy(tx1, ty1);
+			double x1 = tp1.x;
+			double y1 = tp1.y;
 
 			double dx = x1 - x0;
 			double dy = y1 - y0;
@@ -609,14 +628,17 @@ void MapWidget::drawSurface(QPainter& painter)
 			QPointF blr;
 
 			{
-				double inv_x0 = inv_transform_x(x0);
-				double inv_y0 = inv_transform_y(y0);
+				Point inv_p = inv_transform_xy(x0, y0);
+				double inv_x0 = inv_p.x;
+				double inv_y0 = inv_p.y;
+
 				double rotx0;
 				double roty0;
 				mMesh.rotate(inv_x0, inv_y0, rotx0, roty0);
 
-				double map_rotx0 = transform_x(rotx0);
-				double map_roty0 = transform_y(roty0);
+				Point  map_rot0 = transform_xy(rotx0, roty0);
+				double map_rotx0 = map_rot0.x;
+				double map_roty0 = map_rot0.y;
 
 				blr.setX(map_rotx0);
 				blr.setY(map_roty0);
@@ -648,8 +670,9 @@ void MapWidget::drawPoints(QPainter& painter)
 		double x = mPoints->x[i];
 		double y = mPoints->y[i];
 
-		double pX = transform_x(x);
-		double pY = transform_y(y);
+		Point p = transform_xy(x, y);
+		double pX = p.x;
+		double pY = p.y;
 
 		painter.setPen(Qt::NoPen);
 		painter.drawEllipse(pX, pY, 8, 8);
@@ -693,11 +716,13 @@ void MapWidget::drawIsolines(QPainter& painter)
 			Point p0 = iso.get(i);
 			Point p1 = iso.get(i + 1);
 
-			int x0 = transform_x(p0.x);
-			int y0 = transform_y(p0.y);
+			Point tp0 = transform_xy(p0.x, p0.y);
+			int x0 = tp0.x;
+			int y0 = tp0.y;
 
-			int x1 = transform_x(p1.x);
-			int y1 = transform_y(p1.y);
+			Point tp1 = transform_xy(p1.x, p1.y);
+			int x1 = tp1.x;
+			int y1 = tp1.y;
 
 			painter.drawLine(x0, y0, x1, y1);
 		}

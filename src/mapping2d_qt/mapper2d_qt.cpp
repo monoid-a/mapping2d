@@ -3,6 +3,7 @@
 #include "MapWidget.h"
 #include "../mapping2d/MethodSettings.h"
 #include "../mapping2d/Variograms.h"
+#include <chrono>
 
 class MWaitCursor
 {
@@ -542,6 +543,22 @@ void mapper2d_qt::createMap()
 	settings.gamma = param0;
 	settings.exponent = param0;
 	settings.smoothParam = smoothParam;
+
+//#define MEASURE_EXECUTION_TIME_ON
+
+#ifdef MEASURE_EXECUTION_TIME_ON
+	auto start = std::chrono::high_resolution_clock::now();
+#endif
+
 	mMapWidget->calculateSurface(&mPoints, settings, mMesh);
+
+#ifdef MEASURE_EXECUTION_TIME_ON
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+	QMessageBox msgBox;
+	msgBox.setText("Execution time: " + QString::number(duration.count()) + " ms");
+	msgBox.exec();
+#endif
+
 	mMapWidget->update();
 }

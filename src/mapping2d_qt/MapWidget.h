@@ -61,6 +61,9 @@ protected:
 	double inv_transform_x(double x);
 	double inv_transform_y(double y);
 
+	Point transform_xy(double x, double y);
+	Point inv_transform_xy(double x, double y);
+
 	void initView();
 
 	void calculateIsolines(double minz, double maxz, int levelCount);

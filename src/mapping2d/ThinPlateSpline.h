@@ -17,11 +17,11 @@ public:
 
 protected:
 	//interpol accessor
+	UblDblMatrix calcMatrix() const;
 	std::vector<double> getWeights(double x, double y) const;
 	std::vector<double> getSampleValues(double x, double y) const;
-	
-	UblDblMatrix calcMatrix() const;
 	double correctZ(double z) const;
+
 	void calcWeights();
 
 protected:

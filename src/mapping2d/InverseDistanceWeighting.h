@@ -21,7 +21,7 @@ protected:
 	double correctZ(double z) const;
 
 private:
-	double m_order;
+	double mOrder;
 };
 
 #endif // MAPPING2D_MAPPING2DINVERSEDISTANCEWEIGHTING_H_

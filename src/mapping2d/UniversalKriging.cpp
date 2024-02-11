@@ -31,16 +31,14 @@ std::vector<double> UniversalKriging::getWeights(double x, double y) const
 {
 	UblDblVec b = calcVec(x, y, mPointsData, mGamma);
 	UblDblVec w = prod(mInvA, b);
-	return { w.begin() , w.end() };
+	std::vector<double> res;
+	res.swap(w.data());
+	return res;
 }
 
 std::vector<double> UniversalKriging::getSampleValues(double x, double y) const
 {
-	std::vector<double> res;
-	res.reserve(mPointsData.z.size());
-	for (auto z : mPointsData.z)
-		res.push_back(z);
-	return res;
+	return mPointsData.z;
 }
 
 UblDblMatrix UniversalKriging::calcMatrix() const

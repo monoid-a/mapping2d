@@ -2,12 +2,12 @@
 #include "InverseDistanceWeighting.h"
 #include <algorithm>
 
-InverseDistanceWeighting::InverseDistanceWeighting(const PointsData& data, double order) : LinearEstimator(data), m_order(order)
+InverseDistanceWeighting::InverseDistanceWeighting(const PointsData& data, double order) : LinearEstimator(data), mOrder(order)
 {
 
 }
 
-InverseDistanceWeighting::InverseDistanceWeighting(PointsData&& data, double order) : LinearEstimator(std::move(data)), m_order(order)
+InverseDistanceWeighting::InverseDistanceWeighting(PointsData&& data, double order) : LinearEstimator(std::move(data)), mOrder(order)
 {
 
 }
@@ -34,7 +34,7 @@ std::vector<double> InverseDistanceWeighting::getWeights(double x, double y) con
 			d = 1.0;
 			inf_ind = (int) i;
 		}
-		inverse_distances.push_back(1.0 / std::pow(d, m_order));
+		inverse_distances.push_back(1.0 / std::pow(d, mOrder));
 	}
 
 	if (inf_ind > -1)
@@ -58,10 +58,7 @@ std::vector<double> InverseDistanceWeighting::getWeights(double x, double y) con
 
 std::vector<double> InverseDistanceWeighting::getSampleValues(double x, double y) const
 {
-	std::vector<double> res;
-	for (auto v : mPointsData.z)
-		res.push_back(v);
-	return res;
+	return mPointsData.z;
 }
 
 double InverseDistanceWeighting::correctZ(double z) const
