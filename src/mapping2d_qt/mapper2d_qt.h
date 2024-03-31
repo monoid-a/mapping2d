@@ -6,6 +6,8 @@
 #include "../mapping2d/MethodSettings.h"
 #include "../mapping2d/Structs.h"
 #include "../mapping2d/RegularMesh2d.h"
+#include "../mapping2d/Surface.h"
+#include "../mapping2d/Isoline.h"
 
 class MapWidget;
 class QGridLayout;
@@ -23,8 +25,10 @@ public:
 	mapper2d_qt(QWidget* parent = Q_NULLPTR);
 
 protected slots:
-	void onSurfCalculated(std::pair<double, double> minmax);
+	void onSurfUpdated();
 	void createMap();
+	void saveSurface();
+	void loadSurface();
 
 protected:
 	void fillCtrlLayout(QGridLayout* ctrlLayout);
@@ -43,14 +47,17 @@ protected:
 	void drawGridChecked();
 	void discreteFillChecked();
 	void continuousFillChecked();
-	void saveSurface();
-	void loadSurface();
-	void calculateAndUpdateIsolines();
+	void calcIsolines();
+	void calculateAndUpdateIsolines(double minz, double maxz, int levelCount);
 
 private:
 	MapWidget* mMapWidget;
 	PointsData mPoints;
 	RegularMesh2d mMesh;
+	std::unique_ptr<Surface> mSurface;
+	std::vector<std::pair<double, Isoline>> mIsolines;
+	double mZMin;
+	double mZMax;
 	QDir mFilesDir;
 	QListWidget* mFileList;
 	QComboBox* mMethodsCmb;

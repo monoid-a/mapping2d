@@ -1,9 +1,17 @@
 #include "pch.h"
 #include "mapper2d_qt.h"
 #include "MapWidget.h"
+#include "../mapping2d/MarchingSquares.h"
 #include "../mapping2d/MethodSettings.h"
 #include "../mapping2d/Variograms.h"
+#include "../mapping2d/Mapper.h"
+
+
+//#define MEASURE_EXECUTION_TIME_ON
+#ifdef MEASURE_EXECUTION_TIME_ON
 #include <chrono>
+#endif
+
 
 class MWaitCursor
 {
@@ -257,18 +265,15 @@ void mapper2d_qt::fillCtrlLayout(QGridLayout* ctrlLayout)
 			edit->setValidator(dv);
 		}
 
-		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::calculateAndUpdateIsolines);
+		connect(edit, &QLineEdit::returnPressed, this, &mapper2d_qt::calcIsolines);
 	}
 
 	mIsoCntValEdit->setText("10");
 
 	QPushButton* calculateIsolinesBtn = new QPushButton(this);
 	calculateIsolinesBtn->setText("Calculate isolines");
-	connect(calculateIsolinesBtn, &QPushButton::clicked, this, &mapper2d_qt::calculateAndUpdateIsolines);
+	connect(calculateIsolinesBtn, &QPushButton::clicked, this, &mapper2d_qt::calcIsolines);
 	ctrlLayout->addWidget(calculateIsolinesBtn, column, 0, 1, columnSpan);
-
-	connect(mMapWidget, &MapWidget::onSurfCalculated, this, &mapper2d_qt::onSurfCalculated);
-	connect(mMapWidget, &MapWidget::onSurfLoaded, this, &mapper2d_qt::onSurfCalculated);
 
 	processCtrlsOnMethodSelect();
 }
@@ -357,40 +362,121 @@ void mapper2d_qt::continuousFillChecked()
 	mMapWidget->setContinuousFill(mContinuousFill->isChecked());
 }
 
+// write file in Irap classic ASCII format
 void mapper2d_qt::saveSurface()
 {
-	mMapWidget->saveSurface();
+	if (!mSurface)
+	{
+		QMessageBox box(QMessageBox::Icon::Critical, "Save surface", "No surface to save", QMessageBox::StandardButton::Ok);
+		box.exec();
+		return;
+	}
+
+	QString path = QFileDialog::getSaveFileName(this, "Save surface");
+
+	QFile file(path);
+	if (file.open(QFile::WriteOnly | QFile::Truncate))
+	{
+		QTextStream out(&file);
+
+		const RegularMesh2d& mesh = const_cast<const Surface*>(mSurface.get())->getMesh();
+
+		size_t nx = mesh.getNx();
+		size_t ny = mesh.getNy();
+
+		double dx = mesh.getDx();
+		double dy = mesh.getDy();
+
+		double xmin = mesh.getXMin();
+		double xmax = mesh.getXMax();
+
+		double ymin = mesh.getYMin();
+		double ymax = mesh.getYMax();
+
+		double zmin = mSurface->getZMin();
+		double zmax = mSurface->getZMax();
+
+		double angle = mesh.getAngle();
+
+		out << "-996" << " " << ny << " " << dy << " " << dx << "\n";
+		out << xmin << " " << xmax << " " << ymin << " " << ymax << "\n";
+		out << nx << " " << angle << " " << xmin << " " << ymin << "\n";
+
+		out << "0 0 0 0 0 0 0" << "\n";
+
+		for (size_t i = 0; i < nx; ++i)
+		{
+			for (size_t j = 0; j < ny; ++j)
+			{
+				double z = mSurface->getZ(i, j);
+				out << z;
+				if (j != ny - 1)
+					out << " ";
+			}
+			out << "\n";
+		}
+	}
 }
 
+// read file from Irap classic ASCII format
 void mapper2d_qt::loadSurface()
 {
-	mMapWidget->loadSurface();
-}
+	QString path = QFileDialog::getOpenFileName(this, "Load surface");
 
-void mapper2d_qt::calculateAndUpdateIsolines()
-{
-	QString minz_str = mIsoMinValEdit->text();
-	minz_str.replace(",", ".");
-	double minz = minz_str.toDouble();
+	QFile file(path);
+	if (file.open(QFile::ReadOnly))
+	{
+		QTextStream in(&file);
 
-	QString maxz_str = mIsoMaxValEdit->text();
-	maxz_str.replace(",", ".");
-	double maxz = maxz_str.toDouble();
+		QString str;
+		in >> str;
+		if (str.toLower() != "-996")
+		{
+			QMessageBox box(QMessageBox::Icon::Critical, "Load surface", "Wrong format", QMessageBox::StandardButton::Ok);
+			box.exec();
+			return;
+		}
 
-	QString isocnt_str = mIsoCntValEdit->text();
-	int cntlvl = isocnt_str.toInt();
+		size_t nx;
+		size_t ny;
+		double xmin;
+		double xmax;
+		double ymin;
+		double ymax;
+		double dx;
+		double dy;
+		double angle;
 
-	MWaitCursor wait;
-	mMapWidget->calculateAndUpdateIsolines(minz, maxz, cntlvl);
-}
+		in >> ny >> dy >> dx;
+		in >> xmin >> xmax >> ymin >> ymax;
+		in >> nx >> angle >> xmin >> ymin;
 
-void mapper2d_qt::onSurfCalculated(std::pair<double, double> minmax)
-{
-	double minz = std::floor(minmax.first);
-	double maxz = std::round(minmax.second);
-	mIsoMinValEdit->setText(QString::number(minz));
-	mIsoMaxValEdit->setText(QString::number(maxz));
-	calculateAndUpdateIsolines();
+		{
+			double _;
+			for (size_t i = 0; i < 7; ++i)
+				in >> _;
+		}
+
+		mMesh = RegularMesh2d(Point{ xmin , ymin }, dx, dy, nx, ny, angle);
+
+		mSurface = std::make_unique<Surface>(mMesh);
+
+		for (size_t i = 0; i < nx; ++i)
+		{
+			for (size_t j = 0; j < ny; ++j)
+			{
+				double z;
+				in >> z;
+				mSurface->setZ(i, j, z);
+			}
+		}
+
+		mZMin = mSurface->getZMin();
+		mZMax = mSurface->getZMax();
+
+		mMapWidget->setData(mSurface.get(), nullptr, mMesh);
+		onSurfUpdated();
+	}
 }
 
 void mapper2d_qt::onFilesBtnClicked()
@@ -496,6 +582,45 @@ void mapper2d_qt::calcMesh()
 	mMesh = RegularMesh2d::calculate(nx, ny, stepx, stepy, origx, origy, angle);
 }
 
+void mapper2d_qt::calculateAndUpdateIsolines(double minz, double maxz, int levelCount)
+{
+	if (!mSurface)
+		return;
+
+	double step = (maxz - minz) / (levelCount - 1);
+
+	MarchingSquares marchSqrIsoliner(mSurface.get());
+	mIsolines = marchSqrIsoliner.calculate(minz, maxz, levelCount - 1, step);
+
+	mMapWidget->setIsolines(mIsolines);
+}
+
+void mapper2d_qt::calcIsolines()
+{
+	QString minz_str = mIsoMinValEdit->text();
+	minz_str.replace(",", ".");
+	double minz = minz_str.toDouble();
+
+	QString maxz_str = mIsoMaxValEdit->text();
+	maxz_str.replace(",", ".");
+	double maxz = maxz_str.toDouble();
+
+	QString isocnt_str = mIsoCntValEdit->text();
+	int cntlvl = isocnt_str.toInt();
+
+	MWaitCursor wait;
+	calculateAndUpdateIsolines(minz, maxz, cntlvl);
+}
+
+void mapper2d_qt::onSurfUpdated()
+{
+	double minz = std::floor(mZMin);
+	double maxz = std::round(mZMax);
+	mIsoMinValEdit->setText(QString::number(minz));
+	mIsoMaxValEdit->setText(QString::number(maxz));
+	calcIsolines();
+}
+
 void mapper2d_qt::createMap()
 {
 	if (mPoints.x.empty() || mPoints.y.empty() || mPoints.z.empty())
@@ -544,13 +669,11 @@ void mapper2d_qt::createMap()
 	settings.exponent = param0;
 	settings.smoothParam = smoothParam;
 
-//#define MEASURE_EXECUTION_TIME_ON
-
 #ifdef MEASURE_EXECUTION_TIME_ON
 	auto start = std::chrono::high_resolution_clock::now();
 #endif
 
-	mMapWidget->calculateSurface(&mPoints, settings, mMesh);
+	mSurface = Mapper::calculateSurface(&mPoints, settings, mMesh);
 
 #ifdef MEASURE_EXECUTION_TIME_ON
 	auto stop = std::chrono::high_resolution_clock::now();
@@ -560,5 +683,8 @@ void mapper2d_qt::createMap()
 	msgBox.exec();
 #endif
 
-	mMapWidget->update();
+	mZMin = mSurface->getZMin();
+	mZMax = mSurface->getZMax();
+	mMapWidget->setData(mSurface.get(), &mPoints, mMesh);
+	onSurfUpdated();
 }

@@ -5,9 +5,8 @@
 #include <QWidget>
 
 #include "../mapping2d/RegularMesh2d.h"
-#include "../mapping2d/MethodSettings.h"
 #include "../mapping2d/Isoline.h"
-#include "../mapping2d/Surface.h"
+
 
 class RegularMesh2d;
 struct PointsData;
@@ -25,20 +24,12 @@ public:
 	explicit MapWidget(QWidget* parent);
 	~MapWidget();
 
-	void calculateSurface(PointsData* ps, MethodSettings settings, size_t nx, size_t ny);
-	void calculateSurface(PointsData* ps, MethodSettings settings, const RegularMesh2d& mesh);
-	void calculateSurface(PointsData* ps, MethodSettings settings);
+	void setData(Surface* surface, PointsData* ps, const RegularMesh2d& mesh);
 	void setDrawPoints(bool b);
 	void setDrawGrid(bool b);
 	void setDiscreteFill(bool b);
 	void setContinuousFill(bool b);
-	void saveSurface();
-	void loadSurface();
-	void calculateAndUpdateIsolines(double minz, double maxz, int levelCount);
-
-signals:
-	void onSurfCalculated(std::pair<double, double> minmax);
-	void onSurfLoaded(std::pair<double, double> minmax);
+	void setIsolines(const std::vector<std::pair<double, Isoline>>& isolines);
 
 protected:
 	void mouseReleaseEvent(QMouseEvent* event) override;
@@ -66,8 +57,6 @@ protected:
 
 	void initView();
 
-	void calculateIsolines(double minz, double maxz, int levelCount);
-
 private:
 	double mScaleVal;
 	double mDeltaScale;
@@ -75,7 +64,7 @@ private:
 	std::pair<double, double> mCenter;
 	RegularMesh2d mMesh;
 	PointsData* mPoints;
-	std::unique_ptr<Surface> mSurface;
+	Surface* mSurface;
 	std::vector<std::pair<double, Isoline>> mIsolines;
 	double mXMax;
 	double mXMin;

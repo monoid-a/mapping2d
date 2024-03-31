@@ -1,9 +1,6 @@
 #include "pch.h"
 #include "MapWidget.h"
-#include "../mapping2d/MarchingSquares.h"
-#include "../mapping2d/Variograms.h"
-#include "../mapping2d/Mapper.h"
-
+#include "../mapping2d/Surface.h"
 
 class Scale
 {
@@ -209,35 +206,20 @@ void MapWidget::initView()
 	mCenter = { mXMin + 0.5 * (mXMax - mXMin) , mYMin + 0.5 * (mYMax - mYMin) };
 }
 
-void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, size_t nx, size_t ny)
+void MapWidget::setData(Surface* surface, PointsData* ps, const RegularMesh2d& mesh)
 {
-	if (ps->x.empty() || ps->y.empty() || ps->z.empty())
-		return;
-
-	mMesh = RegularMesh2d::calculate(*ps, nx, ny);
-
-	calculateSurface(ps, settings, mMesh);
-}
-
-void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings, const RegularMesh2d& mesh)
-{
+	mSurface = surface;
 	mPoints = ps;
 	mMesh = mesh;
-	calculateSurface(ps, settings);
-}
 
-void MapWidget::calculateSurface(PointsData* ps, MethodSettings settings)
-{
 	initView();
-
-	mSurface = Mapper::calculateSurface(mPoints, settings, mMesh);
 
 	mZMin = mSurface->getZMin();
 	mZMax = mSurface->getZMax();
 
 	mPrevPos = std::make_pair(-1, -1);
 
-	emit onSurfCalculated(std::make_pair(mZMin, mZMax));
+	update();
 }
 
 void MapWidget::mouseReleaseEvent(QMouseEvent* event)
@@ -325,145 +307,10 @@ void MapWidget::setContinuousFill(bool b)
 	update();
 }
 
-// write file in Irap classic ASCII format
-void MapWidget::saveSurface()
+void MapWidget::setIsolines(const std::vector<std::pair<double, Isoline>>& isolines)
 {
-	if (!mSurface)
-	{
-		QMessageBox box(QMessageBox::Icon::Critical, "Save surface", "No surface to save", QMessageBox::StandardButton::Ok);
-		box.exec();
-		return;
-	}
-
-	QString path = QFileDialog::getSaveFileName(this, "Save surface");
-
-	QFile file(path);
-	if (file.open(QFile::WriteOnly | QFile::Truncate))
-	{
-		QTextStream out(&file);
-		
-		const RegularMesh2d& mesh = const_cast<const Surface*>(mSurface.get())->getMesh();
-
-		size_t nx = mesh.getNx();
-		size_t ny = mesh.getNy();
-
-		double dx = mesh.getDx();
-		double dy = mesh.getDy();
-
-		double xmin = mesh.getXMin();
-		double xmax = mesh.getXMax();
-
-		double ymin = mesh.getYMin();
-		double ymax = mesh.getYMax();
-
-		double zmin = mSurface->getZMin();
-		double zmax = mSurface->getZMax();
-
-		double angle = mesh.getAngle();
-
-		out << "-996" << " " << ny << " " << dy << " " << dx << "\n";
-		out << xmin << " " << xmax << " " << ymin << " " << ymax << "\n";
-		out << nx << " " << angle << " " << xmin << " " << ymin << "\n";
-
-		out << "0 0 0 0 0 0 0" << "\n";
-		
-		for (size_t i = 0; i < nx; ++i)
-		{
-			for (size_t j = 0; j < ny; ++j)
-			{
-				double z = mSurface->getZ(i, j);
-				out << z;
-				if (j != ny - 1)
-					out << " ";
-			}
-			out << "\n";
-		}
-	}
-}
-
-// read file from Irap classic ASCII format
-void MapWidget::loadSurface()
-{
-	QString path = QFileDialog::getOpenFileName(this, "Load surface");
-
-	QFile file(path);
-	if (file.open(QFile::ReadOnly))
-	{
-		QTextStream in(&file);
-
-		QString str;
-		in >> str;
-		if (str.toLower() != "-996")
-		{
-			QMessageBox box(QMessageBox::Icon::Critical, "Load surface", "Wrong format", QMessageBox::StandardButton::Ok);
-			box.exec();
-			return;
-		}
-
-		size_t nx;
-		size_t ny;
-		double xmin;
-		double xmax;
-		double ymin;
-		double ymax;
-		double dx;
-		double dy;
-		double angle;
-
-		in >> ny >> dy >>  dx;
-		in >> xmin >> xmax >> ymin >> ymax;
-		in >> nx >> angle >> xmin >> ymin;
-
-		{
-			double _;
-			for (size_t i = 0; i < 7; ++i)
-				in >> _ ;
-		}
-
-		mMesh = RegularMesh2d(Point{ xmin , ymin }, dx, dy, nx, ny, angle);
-
-		mSurface = std::make_unique<Surface>(mMesh);
-
-		for (size_t i = 0; i < nx; ++i)
-		{
-			for (size_t j = 0; j < ny; ++j)
-			{
-				double z;
-				in >> z;
-				mSurface->setZ(i, j, z);
-			}
-		}
-
-		mZMin = mSurface->getZMin();
-		mZMax = mSurface->getZMax();
-
-		initView();
-
-		emit onSurfLoaded(std::make_pair(mZMin, mZMax));
-
-		update();
-	}
-}
-
-void MapWidget::calculateAndUpdateIsolines(double minz, double maxz, int levelCount)
-{
-	if (!mSurface)
-		return;
-
-	calculateIsolines(minz, maxz, levelCount);
-
+	mIsolines = isolines;
 	update();
-}
-
-void MapWidget::calculateIsolines(double minz, double maxz, int levelCount)
-{
-	if (!mSurface)
-		return;
-
-	double step = (maxz - minz) / (levelCount - 1);
-
-	MarchingSquares marchSqrIsoliner(mSurface.get());
-	mIsolines = marchSqrIsoliner.calculate(minz, maxz, levelCount - 1, step);
 }
 
 double MapWidget::inv_transform_x(double x)
