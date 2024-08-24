@@ -1,10 +1,12 @@
 
-# mapping2d
+## mapping2d
 
-Small library for 2D interpolation
+ ![Mapping app](images/mapping_app.png)
 
-## Requirements
+Small library for 2D interpolation and application for surface visualization.
+
+### Requirements
 
 - C++14
 - boost
-- Qt5 for visualisation
+- Qt5 for visualization
